@@ -1,0 +1,143 @@
+---
+description: Run benchmark tasks to measure your agent's general capabilities
+---
+
+# Benchmark Command
+
+You are running the AgentBench benchmarking suite. Your job is to orchestrate benchmark tasks and produce scored results.
+
+## Arguments
+
+Parse from $ARGUMENTS:
+- `--suite <name>`: Run only a specific suite (file-creation, research, data-analysis, multi-step, memory, error-handling, tool-efficiency)
+- `--task <id>`: Run a single specific task by ID
+- `--mode <sandboxed|real>`: Override execution mode (default: per-task setting, fallback: sandboxed)
+- `--verbose`: Show detailed output for each task
+- `--keep-workspace`: Don't clean up temp directories after run
+
+## Workflow
+
+### Step 1: Discover Tasks
+
+Read task.yaml files from the plugin's `tasks/` directory structure:
+```
+tasks/{suite-name}/{task-name}/task.yaml
+```
+
+Each task.yaml contains: name, id, suite, difficulty, mode, user_message, input_files, expected_outputs, expected_metrics, scoring weights.
+
+Filter by --suite or --task if specified. List discovered tasks to the user with count and suites.
+
+### Step 2: Set Up Run Directory
+
+Generate a run ID from the current timestamp: `YYYYMMDD-HHmmss`
+
+Create the results directory:
+```
+agentbench-results/{run-id}/
+```
+
+### Step 3: Execute Each Task
+
+For each task:
+
+1. **Set up workspace**:
+   - If mode is "sandboxed": create `/tmp/agentbench-task-{task-id}/` as workspace
+   - If mode is "real": use the current project directory as workspace
+   - Copy input files from `tasks/{suite}/{task}/inputs/` to the workspace
+   - Set environment variable `AGENTBENCH_RUN_ID` to `{run-id}-{task-id}`
+
+2. **Announce**: Tell the user which task is running:
+   `Running: {task.name} [{task.suite}] (difficulty: {task.difficulty})`
+
+3. **Spawn task-runner subagent** with:
+   - The task's `user_message`
+   - The workspace path
+   - The list of input files available in the workspace
+   - The mode (sandboxed/real)
+   - Do NOT pass expected_outputs, validators, or scoring info to the task-runner
+
+4. **Layer 0 — Automated Structural Checks** (you compute this directly):
+   After the task-runner completes, check the workspace:
+   - For each entry in `expected_outputs`:
+     - `file-exists`: Check if a file matching the pattern exists in workspace. Award 30 points if found, 0 if not.
+     - `content-contains`: Read the file, check if each required section keyword appears (case-insensitive search). Award points proportionally (e.g., 4 of 5 sections found = 80% of 40 points = 32 points). Total pool: 40 points.
+     - `word-count-range`: Count words in the file. In range = 30 points. Within 2x range = 15 points. Outside = 0 points.
+   - Normalize the total to 0-100 scale.
+
+5. **Layer 1 — Metrics Analysis** (you compute this directly):
+   - Read the metrics summary from `/tmp/agentbench-{run-id}-{task-id}/summary.json`
+   - If metrics are available and task has expected_metrics:
+     - Tool calls within expected range: 40 points
+     - Tool calls within 2x expected range: 20 points
+     - Tool calls outside 2x range: 0 points
+     - Planning ratio within expected range: 30 points
+     - Planning ratio outside range but within 2x: 15 points
+     - Planning ratio way off: 0 points
+     - Zero errors: 30 points
+     - 1-2 errors: 15 points
+     - 3+ errors: 0 points
+   - Normalize to 0-100 scale
+   - If no metrics available (hooks didn't fire), score as 50 with a note
+
+6. **Spawn evaluator subagent** with:
+   - The full task definition (all of task.yaml contents)
+   - The execution trace (read execution-trace.md from workspace)
+   - All output files from the workspace and their contents
+   - The computed metrics summary
+   - Layer 0 and Layer 1 scores (for context)
+   - Ask it to return Layer 2 and Layer 3 scores as JSON
+
+7. **Compute composite score**:
+   ```
+   score = (L0 * layer0_weight) + (L1 * layer1_weight) + (L2 * layer2_weight) + (L3 * layer3_weight)
+   ```
+   Use weights from task.yaml scoring section, or defaults: L0=0.15, L1=0.25, L2=0.25, L3=0.35
+
+8. **Save task result** to `agentbench-results/{run-id}/{task-id}/`:
+   - `scores.json`: All layer scores, composite score, evaluator notes, breakdown
+   - `metrics.json`: Copy of the hooks metrics summary (if available)
+   - Copy any output files the task-runner created
+
+9. **Display task result** to user:
+   ```
+   {task.name}: {composite}/100 (L0:{l0} L1:{l1} L2:{l2} L3:{l3})
+   ```
+
+### Step 4: Generate Report
+
+After all tasks complete:
+
+1. Collect all task scores and metrics from agentbench-results/{run-id}/
+2. Compute domain averages (group tasks by suite, average composite scores)
+3. Compute overall score (average of domain scores — equal domain weighting)
+4. Compute aggregate metrics (total tool calls, total errors, avg planning ratio, total time)
+5. Spawn the report-generator subagent with:
+   - run_id
+   - mode
+   - All task results (scores, metrics, evaluator notes)
+   - output_dir: agentbench-results/{run-id}/
+6. Report generator produces: report.md, report.html, results.json
+
+### Step 5: Present Results
+
+1. Display the overall score prominently
+2. Show domain breakdown as a simple table
+3. Open report.html in the user's browser:
+   - Windows: `start agentbench-results/{run-id}/report.html`
+   - macOS: `open agentbench-results/{run-id}/report.html`
+   - Linux: `xdg-open agentbench-results/{run-id}/report.html`
+4. Tell the user where full results are saved
+
+### Step 6: Clean Up
+
+If --keep-workspace was NOT specified, remove temp workspace directories under /tmp/agentbench-task-*.
+Always keep the agentbench-results/ directory.
+
+## Error Handling
+
+- If a task-runner subagent fails or returns no output, score that task as 0 across all layers with a note explaining the failure
+- Always continue to the next task even if one fails
+- Display progress as you go so the user knows what's happening
+- If no tasks match the --suite or --task filters, list available suites and tasks
+- If the agentbench-results directory can't be created, warn the user and continue with console output only
