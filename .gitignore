@@ -1,0 +1,4 @@
+agentbench-results/
+/tmp/agentbench-*
+*.log
+.DS_Store
