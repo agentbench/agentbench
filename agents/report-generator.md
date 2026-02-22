@@ -1,6 +1,8 @@
 ---
+name: report-generator
 description: Generates the final benchmark report in HTML, Markdown, and JSON formats
 ---
+name: report-generator
 
 # Report Generator Agent
 

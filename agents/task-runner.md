@@ -1,6 +1,8 @@
 ---
+name: task-runner
 description: Executes a single benchmark task by simulating a user interaction
 ---
+name: task-runner
 
 # Task Runner Agent
 
