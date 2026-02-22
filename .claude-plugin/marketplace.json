@@ -1,0 +1,11 @@
+{
+  "name": "agentbench",
+  "display_name": "AgentBench",
+  "description": "Benchmark your Claude Code agent's general capabilities across 40 real-world tasks spanning 7 domains with 4-layer scoring.",
+  "version": "1.0.0",
+  "author": "AgentBench",
+  "repository": "https://github.com/agentbench/agentbench",
+  "license": "MIT",
+  "keywords": ["benchmark", "testing", "agent", "evaluation", "metrics"],
+  "entry": "./plugin.json"
+}
