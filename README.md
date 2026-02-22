@@ -79,7 +79,7 @@ Captured via hooks (objective, not self-reported):
 - Error count
 - Subagent spawns
 - Context compactions
-- Token estimate
+- Token estimate *(reported only, not scored — quality shouldn't be penalized for thoroughness)*
 
 ## Output
 
