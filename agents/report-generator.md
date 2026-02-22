@@ -57,6 +57,22 @@ Machine-readable results with this structure:
 }
 ```
 
+### Integrity Signature
+
+After writing results.json, generate an HMAC-SHA256 signature to prevent tampering before leaderboard submission:
+
+1. Read the final results.json content as a string
+2. Compute: `HMAC-SHA256(content, "agentbench-v1-" + run_id + "-" + suite_version + "-integrity")`
+3. Use this bash command:
+   ```bash
+   CONTENT=$(cat {output_dir}/results.json)
+   SIG=$(echo -n "$CONTENT" | openssl dgst -sha256 -hmac "agentbench-v1-{run_id}-{suite_version}-integrity" | awk '{print $2}')
+   ```
+4. Add the signature to results.json as a top-level `"signature"` field before the final write
+5. The signature must be computed on the JSON **without** the signature field, then the field is added
+
+The leaderboard verifies this signature on upload. Submissions with invalid or missing signatures are flagged as unverified.
+
 ### 2. report.md
 
 Markdown report with sections: Overall Score, Metrics Overview table, Domain Breakdown table, Task Details table, Top Failures (3-5 worst with specific feedback), Recommendations.
