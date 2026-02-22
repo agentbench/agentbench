@@ -14,6 +14,7 @@ Parse from $ARGUMENTS:
 - `--mode <sandboxed|real>`: Override execution mode (default: per-task setting, fallback: sandboxed)
 - `--verbose`: Show detailed output for each task
 - `--keep-workspace`: Don't clean up temp directories after run
+- `--fast`: Run only easy and medium difficulty tasks. Default is full (all tasks). Combinable with --suite. Ignored when --task is specified.
 
 ## Workflow
 
@@ -26,16 +27,20 @@ tasks/{suite-name}/{task-name}/task.yaml
 
 Each task.yaml contains: name, id, suite, difficulty, mode, user_message, input_files, expected_outputs, expected_metrics, scoring weights.
 
-Filter by --suite or --task if specified. List discovered tasks to the user with count and suites.
+Filter by --suite or --task if specified. If --fast is specified and --task is not, filter to only tasks where difficulty is "easy" or "medium". Determine the profile: "fast" if --fast was specified, otherwise "full". List discovered tasks to the user with count and suites.
 
 ### Step 2: Set Up Run Directory
 
 Generate a run ID from the current timestamp: `YYYYMMDD-HHmmss`
 
+Read `suite_version` from `.claude-plugin/plugin.json`.
+
 Create the results directory:
 ```
 agentbench-results/{run-id}/
 ```
+
+Announce: `Starting AgentBench run {run-id} | Profile: {profile} | Suite version: {suite_version} | Tasks: {count}`
 
 ### Step 3: Execute Each Task
 
@@ -121,6 +126,8 @@ After all tasks complete:
 5. Spawn the report-generator subagent with:
    - run_id
    - mode
+   - profile ("fast" or "full")
+   - suite_version
    - All task results (scores, metrics, evaluator notes)
    - output_dir: agentbench-results/{run-id}/
 6. Report generator produces: report.md, report.html, results.json

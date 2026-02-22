@@ -1,7 +1,8 @@
 {
   "name": "agentbench",
   "description": "Benchmark your Claude Code agent's general capabilities across file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency.",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "suite_version": "1.0.0",
   "author": {
     "name": "AgentBench",
     "url": "https://github.com/agentbench/agentbench"

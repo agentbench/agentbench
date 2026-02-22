@@ -28,4 +28,5 @@ Total: {N} tasks across {M} suites
 ```
 
 5. If $ARGUMENTS contains `--suite <name>`, filter to only that suite
-6. If $ARGUMENTS contains `--json`, output as a JSON array instead of formatted text
+6. If $ARGUMENTS contains `--fast`, filter to only easy and medium difficulty tasks. Show "(fast profile)" in the header.
+7. If $ARGUMENTS contains `--json`, output as a JSON array instead of formatted text

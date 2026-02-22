@@ -15,7 +15,12 @@ Parse from $ARGUMENTS:
 ## Workflow: Compare Existing Runs
 
 1. Load results.json from both run directories in agentbench-results/
-2. Produce a comparison showing:
+2. Check version and profile compatibility:
+   - If `suite_version` differs between runs: warn that score differences may reflect task changes, not agent performance
+   - If `profile` differs between runs: warn and only compare tasks present in both runs (intersection)
+   - If either run is missing `suite_version` or `profile` fields (pre-versioning run): note that comparison may be unreliable
+   - Add a metadata header row to the comparison output showing: run IDs, timestamps, profiles, and suite versions
+3. Produce a comparison showing:
    - Overall scores side-by-side with delta and winner
    - Per-domain comparison table:
      ```
