@@ -1,6 +1,6 @@
 # AgentBench
 
-Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 37 tasks spanning easy to expert difficulty, with real-mode tasks that create realistic git repo workspaces.
+Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 40 tasks spanning easy to expert difficulty, with real-mode tasks that create realistic git repo workspaces.
 
 ## Install
 
@@ -12,8 +12,8 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 ## Quick Start
 
 ```
-/benchmark                              # Run all 37 tasks (full profile)
-/benchmark --fast                       # Run 18 easy+medium tasks (fast profile)
+/benchmark                              # Run all 40 tasks (full profile)
+/benchmark --fast                       # Run 19 easy+medium tasks (fast profile)
 /benchmark --suite research             # Run one domain
 /benchmark --suite research --fast      # Run easy+medium tasks in one domain
 /benchmark --task research-summarize-doc # Run one task
@@ -34,7 +34,7 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 
 | Domain | Tasks | Difficulty | What It Tests |
 |--------|-------|------------|---------------|
-| File Creation | 6 | 2E, 2M, 2H | Documents, spreadsheets, project scaffolding, config migration |
+| File Creation | 9 | 2E, 3M, 4H | Documents, spreadsheets, project scaffolding, config migration, skill graphs |
 | Research | 5 | 3M, 2H | Summarize, compare, multi-source synthesis, git archaeology |
 | Data Analysis | 5 | 1E, 1M, 1H, 1X | Anomalies, statistics, multi-format reconciliation, log pattern detection |
 | Multi-Step | 5 | 1M, 2H, 2X | Data pipelines, log analysis, repo refactoring, release preparation |
@@ -75,8 +75,8 @@ Each run produces three files in `agentbench-results/{run-id}/`:
 
 ## Profiles
 
-- **Full** (default) — All 37 tasks across all difficulty levels
-- **Fast** (`--fast`) — 18 easy+medium tasks for quick feedback, covers all 7 domains
+- **Full** (default) — All 40 tasks across all difficulty levels
+- **Fast** (`--fast`) — 19 easy+medium tasks for quick feedback, covers all 7 domains
 
 Results track the profile used, and `/benchmark-compare` warns when comparing runs with different profiles.
 
