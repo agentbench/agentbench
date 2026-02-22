@@ -12,8 +12,10 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 ## Quick Start
 
 ```
-/benchmark                              # Run all tasks
+/benchmark                              # Run all 37 tasks (full profile)
+/benchmark --fast                       # Run 18 easy+medium tasks (fast profile)
 /benchmark --suite research             # Run one domain
+/benchmark --suite research --fast      # Run easy+medium tasks in one domain
 /benchmark --task research-summarize-doc # Run one task
 /benchmark --mode real                  # Test your real environment
 ```
@@ -70,6 +72,13 @@ Each run produces three files in `agentbench-results/{run-id}/`:
 - **report.html** — Interactive dashboard (auto-opens in browser)
 - **report.md** — Markdown for terminal/GitHub
 - **results.json** — Machine-readable scores and metrics
+
+## Profiles
+
+- **Full** (default) — All 37 tasks across all difficulty levels
+- **Fast** (`--fast`) — 18 easy+medium tasks for quick feedback, covers all 7 domains
+
+Results track the profile used, and `/benchmark-compare` warns when comparing runs with different profiles.
 
 ## Modes
 
