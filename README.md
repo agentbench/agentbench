@@ -1,6 +1,6 @@
 # AgentBench
 
-Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency.
+Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 37 tasks spanning easy to expert difficulty, with real-mode tasks that create realistic git repo workspaces.
 
 ## Install
 
@@ -30,15 +30,17 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 
 ## Domains
 
-| Domain | Tasks | What It Tests |
-|--------|-------|---------------|
-| File Creation | 4 | Produce well-structured documents, spreadsheets, forms |
-| Research | 3 | Summarize, compare, extract structured data from text |
-| Data Analysis | 3 | Find anomalies, compute statistics, cross-reference datasets |
-| Multi-Step | 3 | Chain actions: parse logs, extract tasks, clean data pipelines |
-| Memory | 3 | Recall facts, retain constraints, persist preferences |
-| Error Handling | 3 | Corrupted input, impossible requests, missing files |
-| Tool Efficiency | 3 | Minimal tool calls, right tool choice, no unnecessary edits |
+| Domain | Tasks | Difficulty | What It Tests |
+|--------|-------|------------|---------------|
+| File Creation | 6 | 2E, 2M, 2H | Documents, spreadsheets, project scaffolding, config migration |
+| Research | 5 | 3M, 2H | Summarize, compare, multi-source synthesis, git archaeology |
+| Data Analysis | 5 | 1E, 1M, 1H, 1X | Anomalies, statistics, multi-format reconciliation, log pattern detection |
+| Multi-Step | 5 | 1M, 2H, 2X | Data pipelines, log analysis, repo refactoring, release preparation |
+| Memory | 5 | 2M, 1H, 1X | Recall, constraints, context switching, progressive accumulation |
+| Error Handling | 6 | 1E, 2M, 3H | Corrupted input, cascading failures, misleading errors, partial recovery |
+| Tool Efficiency | 5 | 3E, 2H | Minimal reads, right tool choice, codebase navigation, targeted fixes |
+
+*E=Easy, M=Medium, H=Hard, X=Expert*
 
 ## Scoring
 
@@ -85,11 +87,13 @@ Or manually create:
 ```
 tasks/{suite}/{task-name}/
 ├── task.yaml
+├── setup.sh           # Optional: creates workspace (git repo, files, scenarios)
+├── teardown.sh        # Optional: custom cleanup
 └── inputs/
     └── {input-files}
 ```
 
-See existing tasks for examples.
+Real-mode tasks use `setup.sh` to create realistic git repo workspaces with commit history, code, and embedded bugs or scenarios. See existing tasks for examples.
 
 ## License
 
