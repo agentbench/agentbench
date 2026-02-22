@@ -43,8 +43,10 @@ For each task:
 
 1. **Set up workspace**:
    - If mode is "sandboxed": create `/tmp/agentbench-task-{task-id}/` as workspace
-   - If mode is "real": use the current project directory as workspace
-   - Copy input files from `tasks/{suite}/{task}/inputs/` to the workspace
+   - If mode is "real": create `/tmp/agentbench-task-{task-id}/` as workspace (real-mode tasks still use isolated temp dirs, but allow full tool access)
+   - Copy input files from `tasks/{suite}/{task}/inputs/` to the workspace (if inputs/ exists)
+   - If the task directory contains a `setup.sh`: run `bash tasks/{suite}/{task}/setup.sh {workspace-path}` to scaffold the workspace. The setup script receives the workspace path as $1 and creates files, git repos, etc. inside it.
+   - For validators that use `file-unchanged`: compute checksums of specified files now (after setup, before task-runner runs) and store them for comparison after scoring.
    - Set environment variable `AGENTBENCH_RUN_ID` to `{run-id}-{task-id}`
 
 2. **Announce**: Tell the user which task is running:
@@ -63,6 +65,10 @@ For each task:
      - `file-exists`: Check if a file matching the pattern exists in workspace. Award 30 points if found, 0 if not.
      - `content-contains`: Read the file, check if each required section keyword appears (case-insensitive search). Award points proportionally (e.g., 4 of 5 sections found = 80% of 40 points = 32 points). Total pool: 40 points.
      - `word-count-range`: Count words in the file. In range = 30 points. Within 2x range = 15 points. Outside = 0 points.
+     - `git-log-contains`: Run `git -C {workspace} log --oneline` and check if expected strings appear in commit messages. If `min_commits` is specified, also verify at least that many commits exist. Award 30 points if all expected strings found and commit count met, proportional points otherwise.
+     - `directory-structure`: Check that all paths listed in `paths` exist in the workspace (files and directories). Award 30 points if all present, proportional points for partial matches.
+     - `command-output-contains`: Run the command specified in `command` inside the workspace directory and check if stdout/stderr contains all strings listed in `contains`. Award 30 points if all found and command exits 0, 0 points if command fails.
+     - `file-unchanged`: Compare checksum of specified file against the pre-task-runner checksum recorded during workspace setup. Award 30 points if file unchanged, 0 if modified or deleted.
    - Normalize the total to 0-100 scale.
 
 5. **Layer 1 — Metrics Analysis** (you compute this directly):
@@ -131,6 +137,7 @@ After all tasks complete:
 
 ### Step 6: Clean Up
 
+If the task directory contains a `teardown.sh`: run `bash tasks/{suite}/{task}/teardown.sh {workspace-path}` for any custom cleanup.
 If --keep-workspace was NOT specified, remove temp workspace directories under /tmp/agentbench-task-*.
 Always keep the agentbench-results/ directory.
 
