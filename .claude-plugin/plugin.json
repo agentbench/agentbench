@@ -10,6 +10,5 @@
   "license": "MIT",
   "keywords": ["benchmark", "testing", "agent", "evaluation", "metrics"],
   "commands": "./commands/",
-  "agents": "./agents/",
   "hooks": "./hooks/hooks.json"
 }
