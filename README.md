@@ -48,10 +48,10 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 
 Each task is scored 0-100 across 4 layers:
 
-- **Layer 0 (15%)** — Automated checks: files exist, format valid, content matches
-- **Layer 1 (25%)** — Metrics: tool call count, planning time, errors
-- **Layer 2 (25%)** — Behavioral: instruction adherence, tool choice, approach quality
-- **Layer 3 (35%)** — Output quality: completeness, accuracy, formatting, polish
+- **Layer 0 (20%)** — Automated checks: files exist, format valid, content matches
+- **Layer 1 (35%)** — Metrics: tool call count, planning time, errors
+- **Layer 2 (20%)** — Behavioral: instruction adherence, tool choice, approach quality
+- **Layer 3 (25%)** — Output quality: completeness, accuracy, formatting, polish
 
 ## Key Metrics
 
