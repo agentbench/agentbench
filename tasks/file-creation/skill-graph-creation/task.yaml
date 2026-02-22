@@ -85,6 +85,11 @@ expected_outputs:
       - type: "content-contains"
         sections:
           - "provision-infrastructure"
+  - pattern: "skills/*.md"
+    required: false
+    validators:
+      - type: "link-consistency"
+        files: "skills/*.md"
   - pattern: "graph.json"
     required: true
     validators:

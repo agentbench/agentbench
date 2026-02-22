@@ -75,6 +75,7 @@ For each task:
      - `directory-structure`: Check that all paths listed in `paths` exist in the workspace (files and directories). Award 30 points if all present, proportional points for partial matches.
      - `command-output-contains`: Run the command specified in `command` inside the workspace directory and check if stdout/stderr contains all strings listed in `contains`. Award 30 points if all found and command exits 0, 0 points if command fails.
      - `file-unchanged`: Compare checksum of specified file against the pre-task-runner checksum recorded during workspace setup. Award 30 points if file unchanged, 0 if modified or deleted.
+     - `link-consistency`: Scan all files matching `files` glob pattern. Detect link syntax used in each file: wikilinks (`[[...]]`), markdown links (`[...](...)`) , or plain references. Award 30 points if all files use the same link syntax consistently, 15 points if mixed but one dominant style (>70%), 0 points if no clear pattern. Any valid syntax is accepted — this checks consistency, not which syntax was chosen.
    - Normalize the total to 0-100 scale.
 
 5. **Layer 1 — Metrics Analysis** (you compute this directly):

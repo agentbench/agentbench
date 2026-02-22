@@ -89,6 +89,11 @@ expected_outputs:
         command: "python3 -c \"import json; g=json.load(open('graph.json')); nodes={n['id'] for n in g['nodes']}; edges=g['edges']; valid=all(e['from'] in nodes and e['to'] in nodes for e in edges); connected={e['from'] for e in edges}|{e['to'] for e in edges}; has_content=len(nodes)==5 and len(edges)>=4; print('GRAPH_VALID' if valid and has_content and not (nodes-connected) else f'INVALID: nodes={len(nodes)} edges={len(edges)}')\""
         contains:
           - "GRAPH_VALID"
+  - pattern: "skills/*.md"
+    required: false
+    validators:
+      - type: "link-consistency"
+        files: "skills/*.md"
   - pattern: ".git"
     required: true
     validators:
