@@ -54,6 +54,21 @@ Each task is scored 0-100 across 4 layers:
 - **Layer 2 (20%)** — Behavioral: instruction adherence, tool choice, approach quality
 - **Layer 3 (25%)** — Output quality: completeness, accuracy, formatting, polish
 
+## Not SWE-bench
+
+AgentBench is a different kind of benchmark. Here's how it compares:
+
+| | SWE-bench | AgentBench |
+|---|---|---|
+| **Tests** | Code bug fixes | General agent ability (files, research, data, workflows) |
+| **Measures** | The model | Your setup + config + prompts |
+| **Tasks** | Pull request patches | Real-world work across 7 domains |
+| **Scoring** | Pass/fail | 4-layer 0-100 (automated + behavioral + quality) |
+| **Who varies** | The model changes, setup is fixed | The setup changes, model can be fixed |
+| **Key insight** | "Which model is smartest?" | "How good is your agent configuration?" |
+
+Two people using the same model can score 30 points apart based on their agent config alone.
+
 ## Key Metrics
 
 Captured via hooks (objective, not self-reported):
