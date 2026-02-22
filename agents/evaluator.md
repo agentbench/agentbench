@@ -28,21 +28,25 @@ Score based on HOW the agent executed the task:
 - 0: Ignored or misunderstood instructions
 
 ### Tool Appropriateness (25 points)
-- Did it use the right tools for the job?
-- Did it use Read for reading files (not cat via Bash)?
-- Did it use Write/Edit for file changes (not echo/sed via Bash)?
-- 25: Perfect tool selection
-- 15: Mostly good, minor inefficiencies
-- 5: Poor tool choices throughout
-- 0: Fundamentally wrong tool usage
+
+**Check from the tool call log first (rule-based):**
+- Count instances of `bash cat` / `bash head` / `bash tail` where the Read tool should have been used → each instance: -3 points
+- Count instances of `bash echo >` / `bash printf >` / `bash sed -i` / `bash tee` where Write/Edit tool should have been used → each instance: -3 points
+- Start from 25 and subtract penalties (floor at 0)
+
+**LLM judgment only for what can't be automated:**
+- Were specialized tools used when available (e.g., using grep via bash for simple searches is acceptable, but using bash for complex file creation is not)?
+- Final score: weighted average of rule-based score (70%) and LLM judgment (30%)
 
 ### Approach Quality (25 points)
-- Was the approach logical and well-structured?
-- Did it break complex tasks into sensible steps?
-- 25: Excellent approach, clear reasoning
-- 15: Reasonable approach with minor issues
-- 5: Disorganized or roundabout approach
-- 0: No clear approach
+
+**Check from the tool call log first (rule-based):**
+- **Read-before-write pattern**: Did the agent read input files before producing output? Check if Read/bash-cat calls for input files precede Write calls for output files. If yes: 15 points. If output was produced without reading inputs (when inputs existed): 0 points. If no input files for this task: 15 points.
+- **LLM judgment** (remaining 10 points): Was the approach logical and well-structured? Did it break complex tasks into sensible steps?
+  - 10: Excellent approach, clear reasoning
+  - 6: Reasonable approach with minor issues
+  - 2: Disorganized or roundabout approach
+  - 0: No clear approach
 
 ### Error Recovery (20 points)
 - If errors occurred, did it recover gracefully?
