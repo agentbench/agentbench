@@ -19,6 +19,19 @@ Parse from $ARGUMENTS:
 
 ## Workflow
 
+### Step 0: Choose Execution Mode
+
+If the user did NOT specify `--mode` in arguments, ask them to choose:
+
+"How would you like to run the benchmark?
+
+**🔒 Sandboxed** (recommended) — Tasks run in isolated temp directories. Safe, no side effects.
+**🌐 Real** — Tasks run with full tool access. Tests your actual workflow but may modify files.
+
+Choose: sandboxed / real"
+
+Wait for the user's response before proceeding. If they specified `--mode sandboxed` or `--mode real` in arguments, skip this prompt.
+
 ### Step 1: Discover Tasks
 
 The plugin root is available as `${CLAUDE_PLUGIN_ROOT}`. All file paths below are relative to this root. Use `${CLAUDE_PLUGIN_ROOT}/tasks/` to find task files — do NOT search the filesystem.
