@@ -1,0 +1,17 @@
+<svg width="360" height="360" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg">
+  <!-- Construction Triangle -->
+  <polygon points="180,40 320,300 40,300" stroke="black" stroke-width="1.5" fill="none"/>
+  <!-- Subdivision Lines -->
+  <line x1="180" y1="40" x2="180" y2="300" stroke="black" stroke-width="0.6"/>
+  <line x1="110" y1="170" x2="250" y2="170" stroke="black" stroke-width="0.6"/>
+  <!-- Main A Shape -->
+  <path d="M110 300 L180 80 L250 300 L230 300 L180 140 L130 300 Z" fill="black"/>
+  <!-- Benchmark Crossbar (ratio placed) -->
+  <rect x="145" y="200" width="70" height="12" fill="black"/>
+  <!-- Apex Precision Mark -->
+  <circle cx="180" cy="80" r="4" fill="black"/>
+  <!-- Measurement Ticks -->
+  <line x1="180" y1="40" x2="180" y2="28" stroke="black" stroke-width="1"/>
+  <line x1="40" y1="300" x2="28" y2="300" stroke="black" stroke-width="1"/>
+  <line x1="320" y1="300" x2="332" y2="300" stroke="black" stroke-width="1"/>
+</svg>
