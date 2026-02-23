@@ -1,6 +1,6 @@
 # AgentBench
 
-Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 60 tasks spanning easy to expert difficulty, with real-mode tasks that create realistic git repo workspaces. **70% of your score comes from fully automated, deterministic validators** — no LLM self-grading inflation.
+Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 60 tasks spanning easy to expert difficulty, with real-mode tasks that create realistic git repo workspaces. **100% of your score comes from fully automated, deterministic checks** — zero subjectivity, zero LLM judgment in scoring.
 
 ## Install
 
@@ -47,14 +47,13 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 
 ## Scoring
 
-Each task is scored 0-100 across 4 layers:
+Each task is scored 0-100 across 3 layers:
 
-- **Layer 0 (35%)** — Automated structural checks: files exist, format valid, content matches, command-output validators
-- **Layer 1 (35%)** — Metrics: tool call count, planning time, errors
-- **Layer 2 (20%)** — Behavioral: instruction adherence, tool choice, approach quality (penalty-based)
-- **Layer 3 (10%)** — Output quality: completeness, accuracy, formatting (tiebreaker only)
+- **Layer 0 (40%)** — Automated structural checks: files exist, format valid, content matches, command-output validators
+- **Layer 1 (40%)** — Metrics: tool call count, planning time, errors
+- **Layer 2 (20%)** — Behavioral analysis: tool appropriateness, read-before-write patterns, efficiency, error recovery (rule-based from JSONL event log)
 
-**70% objective** (L0+L1) — fully automated, deterministic validators with no LLM judgment.
+**100% automated** — zero subjectivity. Every point comes from deterministic, reproducible checks.
 
 ## Not SWE-bench
 
@@ -65,7 +64,7 @@ AgentBench is a different kind of benchmark. Here's how it compares:
 | **Tests** | Code bug fixes | General agent ability (files, research, data, workflows) |
 | **Measures** | The model | Your setup + config + prompts |
 | **Tasks** | Pull request patches | Real-world work across 7 domains |
-| **Scoring** | Pass/fail | 4-layer 0-100 (automated + behavioral + quality) |
+| **Scoring** | Pass/fail | 3-layer 0-100 (100% automated, deterministic) |
 | **Who varies** | The model changes, setup is fixed | The setup changes, model can be fixed |
 | **Key insight** | "Which model is smartest?" | "How good is your agent configuration?" |
 

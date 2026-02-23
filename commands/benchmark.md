@@ -108,28 +108,45 @@ For each task:
    - Normalize to 0-100 scale
    - If no metrics available (hooks didn't fire), score as 50 with a note
 
-6. **Spawn evaluator subagent** with:
-   - The full task definition (all of task.yaml contents)
-   - The execution trace (read execution-trace.md from workspace)
-   - All output files from the workspace and their contents
-   - The computed metrics summary
-   - Layer 0 and Layer 1 scores (for context)
-   - Ask it to return Layer 2 and Layer 3 scores as JSON
+6. **Layer 2 — Behavioral Analysis** (you compute this directly from the JSONL events log):
+   Read events from `/tmp/agentbench-{run-id}-{task-id}/events.jsonl`
+   
+   Start at 100 points, apply penalties:
+   
+   **Tool appropriateness** (check from JSONL events):
+   - Count PostToolUse events where tool="Bash" and the input contains "cat ", "head ", "tail ", or "less " followed by a filename → each instance: -3 points (max -15)
+   - Count PostToolUse events where tool="Bash" and the input contains "echo " + ">" or "printf " + ">" for file creation → each instance: -3 points (max -15)
+   
+   **Read-before-write pattern**:
+   - Check if any Read/Bash-cat events for input files exist BEFORE the first Write event for output files
+   - If inputs existed but agent wrote output without reading any inputs first: -20 points
+   - If no input files for this task: no penalty
+   
+   **Efficiency**:
+   - Count duplicate file reads (same file read more than once): -3 points each (max -15)
+   - Count PostToolUseFailure events (tool errors): -5 points each (max -20)
+   
+   **Error recovery**:
+   - If PostToolUseFailure events exist, check if a successful retry follows within 3 events: +5 points back per recovered error
+   
+   Floor at 0, cap at 100.
+   
+   If no JSONL events available (hooks didn't fire), score as 50 with a note.
 
 7. **Compute composite score**:
    ```
-   score = (L0 * layer0_weight) + (L1 * layer1_weight) + (L2 * layer2_weight) + (L3 * layer3_weight)
+   score = (L0 * layer0_weight) + (L1 * layer1_weight) + (L2 * layer2_weight)
    ```
-   Use weights from task.yaml scoring section, or defaults: L0=0.35, L1=0.35, L2=0.20, L3=0.10
+   Use weights from task.yaml scoring section, or defaults: L0=0.40, L1=0.40, L2=0.20
 
 8. **Save task result** to `agentbench-results/{run-id}/{task-id}/`:
-   - `scores.json`: All layer scores, composite score, evaluator notes, breakdown
+   - `scores.json`: All layer scores, composite score, breakdown
    - `metrics.json`: Copy of the hooks metrics summary (if available)
    - Copy any output files the task-runner created
 
 9. **Display task result** to user:
    ```
-   {task.name}: {composite}/100 (L0:{l0} L1:{l1} L2:{l2} L3:{l3})
+   {task.name}: {composite}/100 (L0:{l0} L1:{l1} L2:{l2})
    ```
 
 ### Step 4: Generate Report
@@ -145,7 +162,7 @@ After all tasks complete:
    - mode
    - profile ("fast" or "full")
    - suite_version
-   - All task results (scores, metrics, evaluator notes)
+   - All task results (scores, metrics)
    - output_dir: agentbench-results/{run-id}/
 6. Report generator produces: report.md, report.html, results.json
 

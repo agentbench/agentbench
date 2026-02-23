@@ -38,7 +38,6 @@ expected_metrics:
   tool_calls: [2, 6]
   planning_ratio: [0.07, 0.23]
 scoring:
-  layer0_weight: 0.35
-  layer1_weight: 0.35
+  layer0_weight: 0.40
+  layer1_weight: 0.40
   layer2_weight: 0.20
-  layer3_weight: 0.10
