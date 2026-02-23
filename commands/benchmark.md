@@ -60,6 +60,11 @@ Announce: `Starting AgentBench run {run-id} | Profile: {profile} | Suite version
 
 ### Step 3: Execute Each Task
 
+**Context management**: Running 60 tasks generates a lot of context. To avoid hitting context limits:
+- After each task completes and its score is saved to disk, do NOT keep the task's full output/trace in conversation — just the score summary line.
+- After every 10 tasks, run `/compact` to free context space. The results are safely on disk in `agentbench-results/{run-id}/`.
+- If you receive a "context limit reached" warning, immediately `/compact` and resume from where you left off by reading `agentbench-results/{run-id}/` to see which tasks are already scored.
+
 For each task:
 
 1. **Set up workspace**:
@@ -151,15 +156,18 @@ For each task:
    ```
    Use weights from task.yaml scoring section, or defaults: L0=0.40, L1=0.40, L2=0.20
 
-8. **Save task result** to `agentbench-results/{run-id}/{task-id}/`:
+8. **Save task result immediately** to `agentbench-results/{run-id}/{task-id}/`:
    - `scores.json`: All layer scores, composite score, breakdown
    - `metrics.json`: Copy of the hooks metrics summary (if available)
    - Copy any output files the task-runner created
+   - Also append a line to `agentbench-results/{run-id}/progress.jsonl`: `{"task_id":"{task-id}","suite":"{suite}","score":{composite},"l0":{l0},"l1":{l1},"l2":{l2}}`
+   - This progress file allows resuming after compaction — just read it to see what's done.
 
-9. **Display task result** to user:
+9. **Display task result** to user (one line only — keep context small):
    ```
-   {task.name}: {composite}/100 (L0:{l0} L1:{l1} L2:{l2})
+   ✓ {task.name}: {composite}/100 (L0:{l0} L1:{l1} L2:{l2})
    ```
+   Do NOT print full task details, output contents, or validator results to the conversation.
 
 ### Step 4: Generate Report
 
