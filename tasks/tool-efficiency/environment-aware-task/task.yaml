@@ -1,17 +1,15 @@
-name: "Use Environment-Specific Tools and Integrations"
-id: "tool-efficiency-environment-aware-task"
-version: "1.0"
-suite: "tool-efficiency"
-difficulty: "hard"
-mode: "real"
-
+name: Use Environment-Specific Tools and Integrations
+id: tool-efficiency-environment-aware-task
+version: '1.0'
+suite: tool-efficiency
+difficulty: hard
+mode: real
 description: |
   Tests whether the agent leverages its configured environment — MCP servers,
   custom skills, plugins, project-specific tools — rather than falling back to
   generic approaches. A well-configured agent will attempt to use its available
   integrations. Vanilla Claude Code with no custom setup will use only basic
   tools. The execution trace reveals which approach was taken.
-
 user_message: |
   I need you to accomplish the following using your available tools and
   integrations (MCP servers, custom skills, plugins, project-specific
@@ -29,35 +27,39 @@ user_message: |
 
   Use your environment's actual capabilities — don't just list generic Claude
   Code tools.
-
 input_files:
-  - name: "project-context.md"
-
+- name: project-context.md
 expected_outputs:
-  - pattern: "tools-inventory.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "word-count-range"
-        min: 50
-        max: 800
-  - pattern: "capabilities-report.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "integration"
-          - "recommendation"
-      - type: "word-count-range"
-        min: 100
-        max: 1000
-
+- pattern: tools-inventory.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: word-count-range
+    min: 143
+    max: 706
+- pattern: capabilities-report.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - integration
+    - recommendation
+    - capability
+    - MCP
+    - plugin
+    - tool
+  - type: word-count-range
+    min: 212
+    max: 887
 expected_metrics:
-  tool_calls: [4, 15]
-  planning_ratio: [0.10, 0.35]
-
+  tool_calls:
+  - 4
+  - 14
+  planning_ratio:
+  - 0.11
+  - 0.34
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

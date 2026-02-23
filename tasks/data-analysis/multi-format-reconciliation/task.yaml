@@ -44,13 +44,22 @@ expected_outputs:
     - reference
     - split
     - matched
+    - invoice
+    - payment
+    - bank
+    - mismatch
+    - typo
   - type: word-count-range
-    min: 640
-    max: 1760
+    min: 780
+    max: 1620
 expected_metrics:
-  tool_calls: [9, 19]
-  planning_ratio: [0.17, 0.38]
+  tool_calls:
+  - 9
+  - 18
+  planning_ratio:
+  - 0.18
+  - 0.37
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

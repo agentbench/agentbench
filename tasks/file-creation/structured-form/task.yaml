@@ -26,10 +26,20 @@ expected_outputs:
     - email
     - required
     - optional
+    - validation
+    - field
+    - type
+    - format
+    - phone
+    - section
 expected_metrics:
-  tool_calls: [2, 6]
-  planning_ratio: [0.07, 0.23]
+  tool_calls:
+  - 1
+  - 6
+  planning_ratio:
+  - 0.05
+  - 0.4
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

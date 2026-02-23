@@ -33,8 +33,12 @@ turns:
     - pnpm
     - auto-commit
 expected_metrics:
-  tool_calls: [3, 7]
-  planning_ratio: [0.08, 0.27]
+  tool_calls:
+  - 2
+  - 7
+  planning_ratio:
+  - 0.08
+  - 0.27
 scoring:
   layer0_weight: 0.3
   layer1_weight: 0.15

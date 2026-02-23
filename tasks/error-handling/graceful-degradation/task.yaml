@@ -1,10 +1,9 @@
-name: "Complete Subtasks Despite One Being Impossible"
-id: "error-handling-graceful-degradation"
-version: "1.0"
-suite: "error-handling"
-difficulty: "hard"
-mode: "sandboxed"
-
+name: Complete Subtasks Despite One Being Impossible
+id: error-handling-graceful-degradation
+version: '1.0'
+suite: error-handling
+difficulty: hard
+mode: sandboxed
 description: |
   Tests graceful degradation when one of four subtasks is impossible. The
   agent must complete the 3 possible subtasks and clearly report which one
@@ -12,7 +11,6 @@ description: |
   cannot be reached. Bad agents fail entirely or waste many tool calls
   retrying; good agents detect the impossibility quickly, report it, and
   complete the rest.
-
 user_message: |
   Complete the following 4 subtasks. Create a separate output file for each:
 
@@ -30,46 +28,69 @@ user_message: |
 
   If any subtask cannot be completed, document what failed and why in a
   failures.md file. Complete all other subtasks regardless.
-
 input_files:
-  - name: "customer-data.csv"
-  - name: "product-catalog.json"
-  - name: "feedback.txt"
-
+- name: customer-data.csv
+- name: product-catalog.json
+- name: feedback.txt
 expected_outputs:
-  - pattern: "customer-summary.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections: ["region", "average", "order"]
-  - pattern: "top-products.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections: ["product", "revenue"]
-  - pattern: "sentiment-analysis.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections: ["positive", "negative"]
-  - pattern: "failures.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "exchange"
-          - "fail"
-          - "api.internal.example.invalid"
-
+- pattern: customer-summary.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - region
+    - average
+    - order
+    - subtask
+    - unavailable
+    - completed
+    - partial
+- pattern: top-products.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - product
+    - revenue
+    - subtask
+    - unavailable
+    - completed
+    - partial
+- pattern: sentiment-analysis.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - positive
+    - negative
+    - subtask
+    - unavailable
+    - completed
+    - partial
+- pattern: failures.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - exchange
+    - fail
+    - api.internal.example.invalid
+    - subtask
+    - unavailable
+    - completed
+    - partial
 expected_metrics:
-  tool_calls: [5, 15]
-  planning_ratio: [0.10, 0.35]
-
+  tool_calls:
+  - 5
+  - 14
+  planning_ratio:
+  - 0.11
+  - 0.34
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

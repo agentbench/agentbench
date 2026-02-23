@@ -35,9 +35,13 @@ expected_behavior:
     match: any
   - type: no-crash
 expected_metrics:
-  tool_calls: [3, 7]
-  planning_ratio: [0.08, 0.27]
+  tool_calls:
+  - 3
+  - 6
+  planning_ratio:
+  - 0.09
+  - 0.26
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

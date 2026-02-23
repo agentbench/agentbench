@@ -35,6 +35,10 @@ turns:
     - Generated
 - role: user
   message: |
+    Additional rule: All section headings must be numbered (e.g., "1. Overview", "2. Analysis"). Also, every table must have a caption line above it starting with "Table N:".
+  expect: acknowledgment
+- role: user
+  message: |
     New rule: from now on, always wrap numeric values in backtick formatting
     (like `42` or `$1,250.00`) for readability in all reports.
   expect: acknowledgment
@@ -50,9 +54,9 @@ turns:
   - type: content-contains
     sections:
     - Generated
-  - type: content-contains
-    sections:
     - '`'
+    - '1.'
+    - Table
 - role: user
   message: |
     What formatting rules have I asked you to follow in this session?
@@ -64,11 +68,17 @@ turns:
     - snake_case
     - timestamp
     - backtick
+    - numbered
+    - table caption
     match: all
 expected_metrics:
-  tool_calls: [8, 18]
-  planning_ratio: [0.08, 0.27]
+  tool_calls:
+  - 9
+  - 16
+  planning_ratio:
+  - 0.1
+  - 0.25
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

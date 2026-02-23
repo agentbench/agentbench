@@ -23,27 +23,31 @@ expected_outputs:
   required: true
   validators:
   - type: command-output-contains
-    command: "cd $PWD && python3 -m pytest tests/ -v 2>&1 | tail -5"
+    command: cd $PWD && python3 -m pytest tests/ -v 2>&1 | tail -5
     contains:
-    - "3 passed"
+    - 3 passed
 - pattern: src/formatter.py
   required: true
   validators:
   - type: command-output-contains
-    command: "python3 -c \"import ast; ast.parse(open('src/formatter.py').read()); print('SYNTAX_OK')\""
+    command: python3 -c "import ast; ast.parse(open('src/formatter.py').read()); print('SYNTAX_OK')"
     contains:
     - SYNTAX_OK
 - pattern: src/calculator.py
   required: true
   validators:
   - type: command-output-contains
-    command: "python3 -c \"from src.calculator import divide, average; print('IMPORT_OK')\""
+    command: python3 -c "from src.calculator import divide, average; print('IMPORT_OK')"
     contains:
     - IMPORT_OK
 expected_metrics:
-  tool_calls: [5, 18]
-  planning_ratio: [0.10, 0.30]
+  tool_calls:
+  - 6
+  - 16
+  planning_ratio:
+  - 0.1
+  - 0.25
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

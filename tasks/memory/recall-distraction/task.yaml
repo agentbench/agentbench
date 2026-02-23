@@ -13,9 +13,15 @@ description: |
 turns:
 - role: user
   message: |
-    Remember these details for later: Project deadline is March 15th,
-    Budget is $42,000, Lead engineer is Sarah Chen, Preferred stack
-    is Python + FastAPI.
+    Remember these details for later:
+    - Project deadline is March 15th
+    - Budget is $42,000
+    - Lead engineer is Sarah Chen
+    - Preferred stack is Python + FastAPI
+    - Database: PostgreSQL 16 on AWS RDS
+    - Sprint length: 2 weeks
+    - Code review policy: minimum 2 approvers
+    - Deployment target: us-east-1 and eu-west-2
   expect: acknowledgment
   validators:
   - type: response-contains
@@ -35,22 +41,45 @@ turns:
     pattern: db-comparison.md
 - role: user
   message: |
-    What was the budget I mentioned earlier, and who is the lead engineer?
+    Another task: Create a file called glossary.md with definitions for these terms: REST API, GraphQL, WebSocket, gRPC. Keep each definition to 2-3 sentences.
+  expect: file-output
+  validators:
+  - type: file-exists
+    pattern: glossary.md
+  - type: content-contains
+    sections:
+    - REST
+    - GraphQL
+    - WebSocket
+    - gRPC
+- role: user
+  message: |
+    What were ALL the project details I mentioned earlier? List every single one with exact values.
   expect: correct-recall
   validators:
   - type: response-contains
     values:
     - 42,000
     - Sarah Chen
+    - March 15
+    - FastAPI
+    - PostgreSQL
+    - 2 approvers
+    - us-east-1
+    - eu-west-2
   - type: response-not-contains
     values:
     - don't remember
     - not sure
     - I don't recall
 expected_metrics:
-  tool_calls: [3, 9]
-  planning_ratio: [0.08, 0.27]
+  tool_calls:
+  - 2
+  - 9
+  planning_ratio:
+  - 0.08
+  - 0.27
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

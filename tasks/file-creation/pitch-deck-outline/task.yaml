@@ -42,13 +42,22 @@ expected_outputs:
     - revenue
     - competitive
     - growth
+    - TAM
+    - differentiat
+    - margin
+    - acquisition
+    - valuation
   - type: word-count-range
-    min: 480
-    max: 1320
+    min: 606
+    max: 1194
 expected_metrics:
-  tool_calls: [3, 7]
-  planning_ratio: [0.08, 0.27]
+  tool_calls:
+  - 2
+  - 7
+  planning_ratio:
+  - 0.08
+  - 0.27
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

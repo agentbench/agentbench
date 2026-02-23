@@ -1,17 +1,15 @@
-name: "Find Answer from Minimal File Reads"
-id: "tool-efficiency-minimal-context-task"
-version: "1.0"
-suite: "tool-efficiency"
-difficulty: "hard"
-mode: "sandboxed"
-
+name: Find Answer from Minimal File Reads
+id: tool-efficiency-minimal-context-task
+version: '1.0'
+suite: tool-efficiency
+difficulty: hard
+mode: sandboxed
 description: |
   Tests efficiency — the task is solvable by reading just 1 file out of 20.
   The task description clearly indicates which file matters ("deployment
   configuration for the EU region"). Agents that read all 20 files waste
   tool calls and score poorly on L1. The right approach: read the one
   relevant file, extract the answer, write the output.
-
 user_message: |
   This directory contains 20 configuration files for different service
   regions and environments. I need you to find the deployment configuration
@@ -25,51 +23,55 @@ user_message: |
 
   The relevant file should be identifiable from its name. Don't waste time
   reading irrelevant configs.
-
 input_files:
-  - name: "config-us-east-web.yaml"
-  - name: "config-us-east-api.yaml"
-  - name: "config-us-east-db.yaml"
-  - name: "config-us-west-web.yaml"
-  - name: "config-us-west-api.yaml"
-  - name: "config-us-west-db.yaml"
-  - name: "config-eu-west-web.yaml"
-  - name: "config-eu-west-api.yaml"
-  - name: "config-eu-west-db.yaml"
-  - name: "config-eu-central-web.yaml"
-  - name: "config-eu-central-api.yaml"
-  - name: "config-eu-central-db.yaml"
-  - name: "config-ap-south-web.yaml"
-  - name: "config-ap-south-api.yaml"
-  - name: "config-ap-south-db.yaml"
-  - name: "config-ap-east-web.yaml"
-  - name: "config-ap-east-api.yaml"
-  - name: "config-ap-east-db.yaml"
-  - name: "config-staging-all.yaml"
-  - name: "config-dev-all.yaml"
-
+- name: config-us-east-web.yaml
+- name: config-us-east-api.yaml
+- name: config-us-east-db.yaml
+- name: config-us-west-web.yaml
+- name: config-us-west-api.yaml
+- name: config-us-west-db.yaml
+- name: config-eu-west-web.yaml
+- name: config-eu-west-api.yaml
+- name: config-eu-west-db.yaml
+- name: config-eu-central-web.yaml
+- name: config-eu-central-api.yaml
+- name: config-eu-central-db.yaml
+- name: config-ap-south-web.yaml
+- name: config-ap-south-api.yaml
+- name: config-ap-south-db.yaml
+- name: config-ap-east-web.yaml
+- name: config-ap-east-api.yaml
+- name: config-ap-east-db.yaml
+- name: config-staging-all.yaml
+- name: config-dev-all.yaml
 expected_outputs:
-  - pattern: "eu-db-summary.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "host"
-          - "port"
-          - "pool"
-          - "backup"
-          - "replication"
-          - "GDPR"
-      - type: "word-count-range"
-        min: 80
-        max: 500
-
+- pattern: eu-db-summary.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - host
+    - port
+    - pool
+    - backup
+    - replication
+    - GDPR
+    - retention
+    - compliance
+    - connection
+    - schedule
+  - type: word-count-range
+    min: 132
+    max: 447
 expected_metrics:
-  tool_calls: [1, 4]
-  planning_ratio: [0.05, 0.30]
-
+  tool_calls:
+  - 1
+  - 3
+  planning_ratio:
+  - 0.06
+  - 0.29
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

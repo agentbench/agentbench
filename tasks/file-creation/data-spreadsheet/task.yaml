@@ -29,15 +29,23 @@ expected_outputs:
     - Status
     - Active
     - Engineering
+    - format
+    - normalize
+    - clean
+    - consistent
   - type: command-output-contains
-    command: 'python3 -c "import csv; r=csv.reader(open(''employees.csv'')); rows=list(r); print(''CSV_VALID''
-      if len(rows)>=10 and len(rows[0])>=5 else f''INVALID: {len(rows)} rows, {len(rows[0])} cols'')"'
+    command: 'python3 -c "import csv; r=csv.reader(open(''employees.csv'')); rows=list(r); print(''CSV_VALID'' if len(rows)>=10
+      and len(rows[0])>=5 else f''INVALID: {len(rows)} rows, {len(rows[0])} cols'')"'
     contains:
     - CSV_VALID
 expected_metrics:
-  tool_calls: [2, 6]
-  planning_ratio: [0.07, 0.23]
+  tool_calls:
+  - 1
+  - 6
+  planning_ratio:
+  - 0.07
+  - 0.23
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

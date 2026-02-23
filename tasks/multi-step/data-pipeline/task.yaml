@@ -28,9 +28,8 @@ expected_outputs:
   validators:
   - type: file-exists
   - type: command-output-contains
-    command: 'python3 -c "import csv; r=csv.reader(open(''cleaned-feedback.csv'')); rows=list(r); header=rows[0];
-      print(''CSV_VALID'' if ''Sentiment'' in header and len(rows)>=70 else f''INVALID: {len(rows)} rows,
-      header={header}'')"'
+    command: 'python3 -c "import csv; r=csv.reader(open(''cleaned-feedback.csv'')); rows=list(r); header=rows[0]; print(''CSV_VALID''
+      if ''Sentiment'' in header and len(rows)>=70 else f''INVALID: {len(rows)} rows, header={header}'')"'
     contains:
     - CSV_VALID
 - pattern: feedback-summary.md
@@ -47,10 +46,18 @@ expected_outputs:
     - rating
     - sentiment
     - category
+    - duplicate
+    - whitespace
+    - normalize
+    - distribution
 expected_metrics:
-  tool_calls: [5, 14]
-  planning_ratio: [0.12, 0.32]
+  tool_calls:
+  - 5
+  - 13
+  planning_ratio:
+  - 0.13
+  - 0.31
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

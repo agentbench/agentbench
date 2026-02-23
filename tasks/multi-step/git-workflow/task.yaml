@@ -32,32 +32,31 @@ expected_outputs:
     - subtract
     - greeting
     - README
+    - conflict
+    - merge
+    - resolution
+    - branch
 - pattern: .github/workflows/ci.yml
   required: true
   validators:
   - type: file-exists
   - type: command-output-contains
-    command: "grep -c 'setup-python' .github/workflows/ci.yml && echo CI_FIX_FOUND || echo CI_NOT_FIXED"
+    command: grep -c 'setup-python' .github/workflows/ci.yml && echo CI_FIX_FOUND || echo CI_NOT_FIXED
     contains:
     - CI_FIX_FOUND
 - pattern: release-branch
   required: true
   validators:
   - type: command-output-contains
-    command: "git branch --list 'release/*' | head -1 | grep -q 'release/' && echo RELEASE_BRANCH_EXISTS || echo NO_RELEASE_BRANCH"
+    command: git branch --list 'release/*' | head -1 | grep -q 'release/' && echo RELEASE_BRANCH_EXISTS || echo NO_RELEASE_BRANCH
     contains:
     - RELEASE_BRANCH_EXISTS
 - pattern: merged-branches
   required: true
   validators:
   - type: command-output-contains
-    command: >
-      python3 -c "
-      import subprocess
-      log = subprocess.check_output(['git', 'log', '--oneline', '--all'], text=True)
-      has_multiply = 'multiply' in open('app.py').read() if __import__('os').path.exists('app.py') else False
-      has_subtract = 'subtract' in open('app.py').read() if __import__('os').path.exists('app.py') else False
-      if has_multiply and has_subtract:
+    command: |
+      python3 -c " import subprocess log = subprocess.check_output(['git', 'log', '--oneline', '--all'], text=True) has_multiply = 'multiply' in open('app.py').read() if __import__('os').path.exists('app.py') else False has_subtract = 'subtract' in open('app.py').read() if __import__('os').path.exists('app.py') else False if has_multiply and has_subtract:
           print('MERGE_PASS')
       else:
           print(f'MERGE_FAIL: multiply={has_multiply} subtract={has_subtract}')
@@ -65,9 +64,13 @@ expected_outputs:
     contains:
     - MERGE_PASS
 expected_metrics:
-  tool_calls: [8, 25]
-  planning_ratio: [0.10, 0.30]
+  tool_calls:
+  - 9
+  - 23
+  planning_ratio:
+  - 0.11
+  - 0.29
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

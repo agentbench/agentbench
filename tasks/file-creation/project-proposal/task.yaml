@@ -33,13 +33,22 @@ expected_outputs:
     - phase
     - mitigation
     - deliverable
+    - stakeholder
+    - scope
+    - dependency
+    - resource
+    - milestone
   - type: word-count-range
-    min: 640
-    max: 1760
+    min: 808
+    max: 1592
 expected_metrics:
-  tool_calls: [4, 11]
-  planning_ratio: [0.08, 0.32]
+  tool_calls:
+  - 3
+  - 11
+  planning_ratio:
+  - 0.08
+  - 0.32
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

@@ -26,22 +26,18 @@ expected_outputs:
   validators:
   - type: file-exists
   - type: command-output-contains
-    command: >
-      python3 -c "
-      import sys
-      try:
+    command: |
+      python3 -c " import sys try:
           import tomllib
       except ImportError:
           import tomli as tomllib
       import yaml
-
       with open('legacy-config.yaml') as f:
           y = yaml.safe_load(f)
       with open('config.toml', 'rb') as f:
           t = tomllib.load(f)
 
-      errors = []
-      def check(ydict, tdict, path=''):
+      errors = [] def check(ydict, tdict, path=''):
           for k, v in ydict.items():
               tp = f'{path}.{k}' if path else k
               if isinstance(v, dict):
@@ -60,26 +56,26 @@ expected_outputs:
                   elif str(v) != str(tdict[k]) and type(v) != type(tdict.get(k)):
                       errors.append(f'value mismatch: {tp}: {v} != {tdict.get(k)}')
 
-      check(y, t)
-      # Check type comments exist
-      with open('config.toml') as f:
+      check(y, t) # Check type comments exist with open('config.toml') as f:
           content = f.read()
-      type_comments = content.count('# type:')
-      if type_comments < 20:
+      type_comments = content.count('# type:') if type_comments < 20:
           errors.append(f'only {type_comments} type annotations (need 20+)')
 
       if len(errors) <= 2:
           print('MIGRATION_PASS')
       else:
           print(f'ERRORS: {errors[:5]}')
-      print(f'KEYS_CHECKED:{len([k for d in [y] for k in d])}')
-      "
+      print(f'KEYS_CHECKED:{len([k for d in [y] for k in d])}') "
     contains:
     - MIGRATION_PASS
 expected_metrics:
-  tool_calls: [3, 10]
-  planning_ratio: [0.10, 0.30]
+  tool_calls:
+  - 3
+  - 9
+  planning_ratio:
+  - 0.11
+  - 0.29
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

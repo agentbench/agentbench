@@ -26,9 +26,9 @@ expected_outputs:
   validators:
   - type: file-exists
   - type: command-output-contains
-    command: "python3 -m pytest test_inventory.py -v 2>&1 | tail -5"
+    command: python3 -m pytest test_inventory.py -v 2>&1 | tail -5
     contains:
-    - "12 passed"
+    - 12 passed
 - pattern: test_inventory.py
   required: true
   validators:
@@ -37,14 +37,8 @@ expected_outputs:
   required: true
   validators:
   - type: command-output-contains
-    command: >
-      python3 -c "
-      content = open('inventory.py').read()
-      lines = content.strip().split('\n')
-      has_docstrings = content.count('\"\"\"') >= 6
-      has_type_hints = ':' in content and '->' in content
-      # Check it's not just the same file
-      if len(lines) > 150:
+    command: |
+      python3 -c " content = open('inventory.py').read() lines = content.strip().split('\n') has_docstrings = content.count('\"\"\"') >= 6 has_type_hints = ':' in content and '->' in content # Check it's not just the same file if len(lines) > 150:
           print('NOT_SHORTER')
       elif has_docstrings:
           print('REFACTOR_PASS')
@@ -54,9 +48,13 @@ expected_outputs:
     contains:
     - REFACTOR_PASS
 expected_metrics:
-  tool_calls: [5, 18]
-  planning_ratio: [0.10, 0.30]
+  tool_calls:
+  - 6
+  - 16
+  planning_ratio:
+  - 0.1
+  - 0.25
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

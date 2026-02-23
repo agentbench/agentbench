@@ -32,24 +32,17 @@ expected_outputs:
     - project
     - budget
     - revenue
-    - "847500"
+    - '847500'
     - Alpha
     - Gamma
     - Alice
+    - endpoint
+    - aggregat
+    - user
+    - status
   - type: command-output-contains
-    command: >
-      python3 -c "
-      content = open('report.md').read()
-      checks = 0
-      # Check total revenue mentioned
-      if '847500' in content or '847,500' in content: checks += 1
-      # Check active projects budget (50000+75000=125000)
-      if '125000' in content or '125,000' in content: checks += 1
-      # Check active user count (4 active)
-      if any(x in content for x in ['4 active', 'four active', '4 users']): checks += 1
-      # Check project-owner mapping
-      if 'Alice' in content and ('Alpha' in content or 'Gamma' in content): checks += 1
-      if checks >= 3:
+    command: |
+      python3 -c " content = open('report.md').read() checks = 0 # Check total revenue mentioned if '847500' in content or '847,500' in content: checks += 1 # Check active projects budget (50000+75000=125000) if '125000' in content or '125,000' in content: checks += 1 # Check active user count (4 active) if any(x in content for x in ['4 active', 'four active', '4 users']): checks += 1 # Check project-owner mapping if 'Alice' in content and ('Alpha' in content or 'Gamma' in content): checks += 1 if checks >= 3:
           print('REPORT_PASS')
       else:
           print(f'REPORT_FAIL: {checks}/4 checks passed')
@@ -57,9 +50,13 @@ expected_outputs:
     contains:
     - REPORT_PASS
 expected_metrics:
-  tool_calls: [5, 15]
-  planning_ratio: [0.10, 0.30]
+  tool_calls:
+  - 6
+  - 13
+  planning_ratio:
+  - 0.1
+  - 0.25
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

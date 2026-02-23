@@ -79,9 +79,13 @@ expected_outputs:
     - diff
     - apply
 expected_metrics:
-  tool_calls: [6, 14]
-  planning_ratio: [0.12, 0.32]
+  tool_calls:
+  - 6
+  - 13
+  planning_ratio:
+  - 0.13
+  - 0.31
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

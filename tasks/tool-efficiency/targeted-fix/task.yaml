@@ -28,9 +28,13 @@ expected_outputs:
     contains:
     - passed
 expected_metrics:
-  tool_calls: [4, 7]
-  planning_ratio: [0.12, 0.23]
+  tool_calls:
+  - 4
+  - 6
+  planning_ratio:
+  - 0.13
+  - 0.22
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

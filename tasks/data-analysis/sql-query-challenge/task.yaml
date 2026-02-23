@@ -26,44 +26,21 @@ expected_outputs:
   validators:
   - type: file-exists
   - type: command-output-contains
-    command: >
-      python3 -c "
-      import csv, sqlite3
-      conn = sqlite3.connect('company.db')
-      c = conn.cursor()
-      # Q1: Total Q1 2024 revenue
-      c.execute(\"SELECT SUM(amount) FROM sales WHERE sale_date >= '2024-01-01' AND sale_date <= '2024-03-31'\")
-      q1 = c.fetchone()[0]
-      # Q2: Dept with highest avg salary
-      c.execute('SELECT d.name FROM departments d JOIN employees e ON d.id=e.department_id GROUP BY d.id ORDER BY AVG(e.salary) DESC LIMIT 1')
-      q2 = c.fetchone()[0]
-      # Q3: Top salesperson
-      c.execute('SELECT e.first_name, e.last_name FROM employees e JOIN sales s ON e.id=s.employee_id GROUP BY e.id ORDER BY SUM(s.amount) DESC LIMIT 1')
-      r = c.fetchone()
-      q3_first, q3_last = r[0], r[1]
-      # Q4: Employees hired in 2023
-      c.execute(\"SELECT COUNT(*) FROM employees WHERE hire_date >= '2023-01-01' AND hire_date <= '2023-12-31'\")
-      q4 = c.fetchone()[0]
-      conn.close()
-      # Check answers.csv
-      with open('answers.csv') as f:
+    command: |
+      python3 -c " import csv, sqlite3 conn = sqlite3.connect('company.db') c = conn.cursor() # Q1: Total Q1 2024 revenue c.execute(\"SELECT SUM(amount) FROM sales WHERE sale_date >= '2024-01-01' AND sale_date <= '2024-03-31'\") q1 = c.fetchone()[0] # Q2: Dept with highest avg salary c.execute('SELECT d.name FROM departments d JOIN employees e ON d.id=e.department_id GROUP BY d.id ORDER BY AVG(e.salary) DESC LIMIT 1') q2 = c.fetchone()[0] # Q3: Top salesperson c.execute('SELECT e.first_name, e.last_name FROM employees e JOIN sales s ON e.id=s.employee_id GROUP BY e.id ORDER BY SUM(s.amount) DESC LIMIT 1') r = c.fetchone() q3_first, q3_last = r[0], r[1] # Q4: Employees hired in 2023 c.execute(\"SELECT COUNT(*) FROM employees WHERE hire_date >= '2023-01-01' AND hire_date <= '2023-12-31'\") q4 = c.fetchone()[0] conn.close() # Check answers.csv with open('answers.csv') as f:
           reader = csv.reader(f)
           rows = {str(r[0]).strip(): str(r[1]).strip() for r in reader if r and r[0].strip().isdigit()}
-      ok = 0
-      if '1' in rows and str(q1) in rows['1'].replace(',',''): ok += 1
-      if '2' in rows and q2.lower() in rows['2'].lower(): ok += 1
-      if '3' in rows and q3_last.lower() in rows['3'].lower(): ok += 1
-      if '4' in rows and str(q4) in rows['4']: ok += 1
-      if '5' in rows: ok += 1  # partial credit for attempting
-      print(f'QUERIES_CORRECT:{ok}/5')
-      if ok >= 4: print('SQL_PASS')
-      "
+      ok = 0 if '1' in rows and str(q1) in rows['1'].replace(',',''): ok += 1 if '2' in rows and q2.lower() in rows['2'].lower(): ok += 1 if '3' in rows and q3_last.lower() in rows['3'].lower(): ok += 1 if '4' in rows and str(q4) in rows['4']: ok += 1 if '5' in rows: ok += 1  # partial credit for attempting print(f'QUERIES_CORRECT:{ok}/5') if ok >= 4: print('SQL_PASS') "
     contains:
     - SQL_PASS
 expected_metrics:
-  tool_calls: [5, 15]
-  planning_ratio: [0.10, 0.30]
+  tool_calls:
+  - 5
+  - 14
+  planning_ratio:
+  - 0.11
+  - 0.29
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

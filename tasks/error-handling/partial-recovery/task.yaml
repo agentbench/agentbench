@@ -35,6 +35,10 @@ expected_outputs:
     - error
     - reason
     - skipped
+    - resilient
+    - isolation
+    - per-file
+    - total
 - pattern: import.py
   required: true
   validators:
@@ -43,6 +47,10 @@ expected_outputs:
     - try
     - except
     - continue
+    - resilient
+    - isolation
+    - per-file
+    - total
 expected_behavior:
 - description: Script runs to completion and imports valid files
   validators:
@@ -51,9 +59,13 @@ expected_behavior:
     contains:
     - Import
 expected_metrics:
-  tool_calls: [9, 19]
-  planning_ratio: [0.12, 0.32]
+  tool_calls:
+  - 9
+  - 18
+  planning_ratio:
+  - 0.13
+  - 0.31
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

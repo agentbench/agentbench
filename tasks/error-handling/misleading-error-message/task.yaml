@@ -28,6 +28,10 @@ expected_outputs:
     - expired
     - '401'
     - session
+    - stack trace
+    - misleading
+    - actual
+    - root
     match: any
 expected_behavior:
 - description: Fix addresses auth middleware, not just orders.js
@@ -41,9 +45,13 @@ expected_behavior:
     - expire
     match: any
 expected_metrics:
-  tool_calls: [9, 17]
-  planning_ratio: [0.18, 0.42]
+  tool_calls:
+  - 9
+  - 16
+  planning_ratio:
+  - 0.19
+  - 0.41
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

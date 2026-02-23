@@ -23,41 +23,22 @@ expected_outputs:
   validators:
   - type: file-exists
   - type: command-output-contains
-    command: "python3 -c \"import ast; ast.parse(open('fibonacci.py').read()); print('SYNTAX_OK')\""
+    command: python3 -c "import ast; ast.parse(open('fibonacci.py').read()); print('SYNTAX_OK')"
     contains:
     - SYNTAX_OK
   - type: command-output-contains
-    command: >
-      python3 -c "
-      import importlib.util, sys
-      spec = importlib.util.spec_from_file_location('fibonacci', 'fibonacci.py')
-      mod = importlib.util.module_from_spec(spec)
-      spec.loader.exec_module(mod)
-      errors = []
-      # Test basic values
-      if mod.fibonacci(0) != 0: errors.append('fib(0) wrong')
-      if mod.fibonacci(1) != 1: errors.append('fib(1) wrong')
-      if mod.fibonacci(10) != 55: errors.append('fib(10) wrong')
-      if mod.fibonacci(20) != 6765: errors.append('fib(20) wrong')
-      # Test sequence
-      seq = mod.fibonacci_sequence(7)
-      if seq != [0, 1, 1, 2, 3, 5, 8]: errors.append(f'sequence(7) wrong: {seq}')
-      # Test edge cases
-      try:
+    command: |
+      python3 -c " import importlib.util, sys spec = importlib.util.spec_from_file_location('fibonacci', 'fibonacci.py') mod = importlib.util.module_from_spec(spec) spec.loader.exec_module(mod) errors = [] # Test basic values if mod.fibonacci(0) != 0: errors.append('fib(0) wrong') if mod.fibonacci(1) != 1: errors.append('fib(1) wrong') if mod.fibonacci(10) != 55: errors.append('fib(10) wrong') if mod.fibonacci(20) != 6765: errors.append('fib(20) wrong') # Test sequence seq = mod.fibonacci_sequence(7) if seq != [0, 1, 1, 2, 3, 5, 8]: errors.append(f'sequence(7) wrong: {seq}') # Test edge cases try:
           mod.fibonacci(-1)
           errors.append('negative input should raise ValueError')
       except ValueError:
           pass
-      # Test large number
-      try:
+      # Test large number try:
           r = mod.fibonacci(100)
           if r != 354224848179261915075: errors.append(f'fib(100) wrong: {r}')
       except Exception as e:
           errors.append(f'fib(100) failed: {e}')
-      # Test sequence(0)
-      s0 = mod.fibonacci_sequence(0)
-      if s0 != []: errors.append(f'sequence(0) wrong: {s0}')
-
+      # Test sequence(0) s0 = mod.fibonacci_sequence(0) if s0 != []: errors.append(f'sequence(0) wrong: {s0}')
       if not errors:
           print('FIBONACCI_PASS')
       else:
@@ -70,13 +51,17 @@ expected_outputs:
   validators:
   - type: file-exists
   - type: command-output-contains
-    command: "python3 -m pytest test_fibonacci.py -v 2>&1 | tail -3"
+    command: python3 -m pytest test_fibonacci.py -v 2>&1 | tail -3
     contains:
     - passed
 expected_metrics:
-  tool_calls: [3, 10]
-  planning_ratio: [0.10, 0.30]
+  tool_calls:
+  - 3
+  - 9
+  planning_ratio:
+  - 0.11
+  - 0.29
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

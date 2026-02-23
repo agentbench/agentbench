@@ -44,13 +44,22 @@ expected_outputs:
     - propagat
     - service-a
     - service-b
+    - payment
+    - latency
+    - error rate
+    - threshold
+    - recovery
   - type: word-count-range
-    min: 800
-    max: 2200
+    min: 940
+    max: 2060
 expected_metrics:
-  tool_calls: [12, 23]
-  planning_ratio: [0.17, 0.38]
+  tool_calls:
+  - 13
+  - 21
+  planning_ratio:
+  - 0.1
+  - 0.25
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

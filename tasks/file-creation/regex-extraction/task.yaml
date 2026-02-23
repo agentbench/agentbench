@@ -40,14 +40,10 @@ expected_outputs:
   validators:
   - type: file-exists
   - type: command-output-contains
-    command: >
-      python3 -c "
-      import json
-      with open('extracted.json') as f:
+    command: |
+      python3 -c " import json with open('extracted.json') as f:
           data = json.load(f)
-      errors = []
-      # Check structure
-      for key in ['unique_ips', 'errors', 'failed_logins', 'summary']:
+      errors = [] # Check structure for key in ['unique_ips', 'errors', 'failed_logins', 'summary']:
           if key not in data:
               errors.append(f'missing key: {key}')
       if errors:
@@ -77,9 +73,13 @@ expected_outputs:
     contains:
     - EXTRACTION_PASS
 expected_metrics:
-  tool_calls: [5, 15]
-  planning_ratio: [0.10, 0.30]
+  tool_calls:
+  - 5
+  - 14
+  planning_ratio:
+  - 0.11
+  - 0.29
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

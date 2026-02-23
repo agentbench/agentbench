@@ -1,10 +1,9 @@
-name: "Discover Hidden Pattern in Dataset"
-id: "data-analysis-hidden-pattern"
-version: "1.0"
-suite: "data-analysis"
-difficulty: "expert"
-mode: "sandboxed"
-
+name: Discover Hidden Pattern in Dataset
+id: data-analysis-hidden-pattern
+version: '1.0'
+suite: data-analysis
+difficulty: expert
+mode: sandboxed
 description: |
   Tests deep analytical capability. The dataset has 200 rows of transaction data
   with obvious surface-level issues (outliers, missing values). But there's a
@@ -12,7 +11,6 @@ description: |
   that is exactly 1.13x the amount of the row 3 positions before it. This
   pattern indicates systematic price manipulation. Surface-level analysis will
   find the obvious stuff; only thorough analysis discovers the hidden pattern.
-
 user_message: |
   Analyze the transaction dataset in transactions.csv thoroughly. Go beyond
   surface-level statistics. Create analysis-report.md with:
@@ -23,38 +21,48 @@ user_message: |
 
   Look carefully — there may be patterns that aren't immediately obvious.
   Explain any patterns you find with specific row references and evidence.
-
 input_files:
-  - name: "transactions.csv"
-
+- name: transactions.csv
 expected_outputs:
-  - pattern: "analysis-report.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "mean"
-          - "outlier"
-          - "pattern"
-          - "anomal"
-      - type: "content-contains"
-        sections:
-          - "1.13"
-          - "7th"
-          - "every 7"
-          - "manipulation"
-          - "systematic"
-        match: "any"
-      - type: "word-count-range"
-        min: 400
-        max: 2000
-
+- pattern: analysis-report.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - mean
+    - outlier
+    - pattern
+    - anomal
+    - correlation
+    - statistical
+    - row
+    - transaction
+    - evidence
+  - type: content-contains
+    sections:
+    - '1.13'
+    - 7th
+    - every 7
+    - manipulation
+    - systematic
+    - correlation
+    - statistical
+    - row
+    - transaction
+    - evidence
+    match: any
+  - type: word-count-range
+    min: 560
+    max: 1840
 expected_metrics:
-  tool_calls: [4, 15]
-  planning_ratio: [0.15, 0.40]
-
+  tool_calls:
+  - 5
+  - 13
+  planning_ratio:
+  - 0.1
+  - 0.25
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

@@ -32,13 +32,22 @@ expected_outputs:
     - scalability
     - performance
     - use case
+    - trade-off
+    - limitation
+    - latency
+    - consistency
+    - throughput
   - type: word-count-range
-    min: 405
-    max: 895
+    min: 478
+    max: 821
 expected_metrics:
-  tool_calls: [4, 9]
-  planning_ratio: [0.13, 0.37]
+  tool_calls:
+  - 3
+  - 9
+  planning_ratio:
+  - 0.13
+  - 0.37
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

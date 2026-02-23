@@ -30,9 +30,13 @@ expected_behavior:
     - instead
     match: any
 expected_metrics:
-  tool_calls: [0, 4]
-  planning_ratio: [0.26, 0.74]
+  tool_calls:
+  - 1
+  - 3
+  planning_ratio:
+  - 0.28
+  - 0.72
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

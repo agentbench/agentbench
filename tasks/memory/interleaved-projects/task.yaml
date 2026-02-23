@@ -58,9 +58,13 @@ turns:
     - db-prod-2
     match: all
 expected_metrics:
-  tool_calls: [10, 20]
-  planning_ratio: [0.12, 0.28]
+  tool_calls:
+  - 10
+  - 19
+  planning_ratio:
+  - 0.13
+  - 0.27
 scoring:
   layer0_weight: 0.25
   layer1_weight: 0.15
-  layer2_weight: 0.20
+  layer2_weight: 0.2

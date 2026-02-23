@@ -32,35 +32,25 @@ expected_outputs:
   validators:
   - type: file-exists
   - type: command-output-contains
-    command: >
-      python3 -c "
-      import csv
-      with open('clean_merged.csv') as f:
+    command: |
+      python3 -c " import csv with open('clean_merged.csv') as f:
           reader = csv.DictReader(f)
           rows = list(reader)
           headers = reader.fieldnames
-      errors = []
-      # Check required columns
-      required = ['customer_id','customer_name','email','signup_date','country','order_count','total_spent','avg_rating']
-      for col in required:
+      errors = [] # Check required columns required = ['customer_id','customer_name','email','signup_date','country','order_count','total_spent','avg_rating'] for col in required:
           found = any(col.lower().replace(' ','_') in h.lower().replace(' ','_') for h in headers)
           if not found:
               errors.append(f'missing column: {col}')
-      # Check no exact duplicates
-      seen = set()
-      for r in rows:
+      # Check no exact duplicates seen = set() for r in rows:
           key = r.get('customer_id', r.get('id',''))
           if key in seen:
               errors.append(f'duplicate customer_id: {key}')
           seen.add(key)
-      # Check row count (should be ~13-15 unique customers with complete data)
-      if len(rows) < 10:
+      # Check row count (should be ~13-15 unique customers with complete data) if len(rows) < 10:
           errors.append(f'too few rows: {len(rows)}')
       if len(rows) > 16:
           errors.append(f'too many rows: {len(rows)}')
-      # Check date format consistency
-      import re
-      for r in rows:
+      # Check date format consistency import re for r in rows:
           d = r.get('signup_date','')
           if d and not re.match(r'^\d{4}-\d{2}-\d{2}$', d):
               errors.append(f'bad date format: {d}')
@@ -69,15 +59,17 @@ expected_outputs:
           print('PIPELINE_PASS')
       else:
           print(f'ERRORS: {errors[:5]}')
-      print(f'ROWS:{len(rows)}')
-      print(f'COLS:{len(headers)}')
-      "
+      print(f'ROWS:{len(rows)}') print(f'COLS:{len(headers)}') "
     contains:
     - PIPELINE_PASS
 expected_metrics:
-  tool_calls: [6, 20]
-  planning_ratio: [0.10, 0.30]
+  tool_calls:
+  - 7
+  - 18
+  planning_ratio:
+  - 0.1
+  - 0.25
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

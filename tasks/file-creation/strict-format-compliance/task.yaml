@@ -1,82 +1,80 @@
-name: "Create Document with Strict Format Template"
-id: "file-creation-strict-format-compliance"
-version: "1.0"
-suite: "file-creation"
-difficulty: "hard"
-mode: "sandboxed"
-
+name: Create Document with Strict Format Template
+id: file-creation-strict-format-compliance
+version: '1.0'
+suite: file-creation
+difficulty: hard
+mode: sandboxed
 description: |
   Tests attention to detail by requiring a document that follows an extremely
   specific format template. Every structural requirement is validated: exact
   heading levels, exact section order, specific YAML frontmatter fields,
   ISO 8601 date format, specific separator styles, and required subsections.
   Most agents will get the content right but miss subtle formatting requirements.
-
 user_message: |
   Read the format template in format-template.md and the project data in
   project-data.txt. Create a document called project-status.md that follows
   the template EXACTLY. Every formatting requirement must be met precisely —
   heading levels, section order, date formats, separator styles, frontmatter
   fields. The content should come from project-data.txt.
-
 input_files:
-  - name: "format-template.md"
-  - name: "project-data.txt"
-
+- name: format-template.md
+- name: project-data.txt
 expected_outputs:
-  - pattern: "project-status.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "---"
-          - "title:"
-          - "author:"
-          - "date:"
-          - "status:"
-          - "revision:"
-      - type: "command-output-contains"
-        command: |
-          python3 -c "
-          import re, sys
-          content = open('project-status.md').read()
-          checks = []
-          # Check frontmatter exists
-          checks.append(('frontmatter', content.startswith('---')))
-          # Check ISO date format in frontmatter
-          checks.append(('iso_date', bool(re.search(r'date: \d{4}-\d{2}-\d{2}', content))))
-          # Check exact heading hierarchy: h1 for title, h2 for sections, h3 for subsections
-          h1s = re.findall(r'^# [^\n]+', content, re.M)
-          h2s = re.findall(r'^## [^\n]+', content, re.M)
-          h3s = re.findall(r'^### [^\n]+', content, re.M)
-          checks.append(('h1_count', len(h1s) == 1))
-          checks.append(('has_h2s', len(h2s) >= 5))
-          checks.append(('has_h3s', len(h3s) >= 3))
-          # Check required sections in order
-          sections = ['Executive Summary', 'Timeline', 'Budget', 'Risks', 'Next Steps']
-          positions = [content.find(s) for s in sections]
-          checks.append(('section_order', all(p >= 0 for p in positions) and positions == sorted(positions)))
-          # Check horizontal rules between sections
-          checks.append(('separators', content.count('---') >= 3))
-          passed = sum(1 for _, v in checks if v)
-          total = len(checks)
-          print(f'FORMAT_CHECK:{passed}/{total}')
-          for name, val in checks:
-              if not val:
-                  print(f'  FAIL: {name}')
-          "
-        contains:
-          - "FORMAT_CHECK:7/7"
-      - type: "word-count-range"
-        min: 300
-        max: 1200
-
+- pattern: project-status.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - '---'
+    - 'title:'
+    - 'author:'
+    - 'date:'
+    - 'status:'
+    - 'revision:'
+  - type: command-output-contains
+    command: |
+      python3 -c "
+      import re, sys
+      content = open('project-status.md').read()
+      checks = []
+      # Check frontmatter exists
+      checks.append(('frontmatter', content.startswith('---')))
+      # Check ISO date format in frontmatter
+      checks.append(('iso_date', bool(re.search(r'date: \d{4}-\d{2}-\d{2}', content))))
+      # Check exact heading hierarchy: h1 for title, h2 for sections, h3 for subsections
+      h1s = re.findall(r'^# [^\n]+', content, re.M)
+      h2s = re.findall(r'^## [^\n]+', content, re.M)
+      h3s = re.findall(r'^### [^\n]+', content, re.M)
+      checks.append(('h1_count', len(h1s) == 1))
+      checks.append(('has_h2s', len(h2s) >= 5))
+      checks.append(('has_h3s', len(h3s) >= 3))
+      # Check required sections in order
+      sections = ['Executive Summary', 'Timeline', 'Budget', 'Risks', 'Next Steps']
+      positions = [content.find(s) for s in sections]
+      checks.append(('section_order', all(p >= 0 for p in positions) and positions == sorted(positions)))
+      # Check horizontal rules between sections
+      checks.append(('separators', content.count('---') >= 3))
+      passed = sum(1 for _, v in checks if v)
+      total = len(checks)
+      print(f'FORMAT_CHECK:{passed}/{total}')
+      for name, val in checks:
+          if not val:
+              print(f'  FAIL: {name}')
+      "
+    contains:
+    - FORMAT_CHECK:7/7
+  - type: word-count-range
+    min: 412
+    max: 1087
 expected_metrics:
-  tool_calls: [3, 8]
-  planning_ratio: [0.10, 0.35]
-
+  tool_calls:
+  - 3
+  - 7
+  planning_ratio:
+  - 0.11
+  - 0.34
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

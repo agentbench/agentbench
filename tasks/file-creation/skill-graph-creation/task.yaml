@@ -50,6 +50,10 @@ expected_outputs:
     - run-tests
     - monitor-health
     - rollback
+    - dependency
+    - relationship
+    - upstream
+    - downstream
 - pattern: skills/
   required: true
   validators:
@@ -68,6 +72,10 @@ expected_outputs:
     sections:
     - configure-services
     - run-tests
+    - dependency
+    - relationship
+    - upstream
+    - downstream
 - pattern: skills/rollback.md
   required: true
   validators:
@@ -75,12 +83,20 @@ expected_outputs:
     sections:
     - monitor-health
     - deploy-application
+    - dependency
+    - relationship
+    - upstream
+    - downstream
 - pattern: skills/configure-services.md
   required: true
   validators:
   - type: content-contains
     sections:
     - provision-infrastructure
+    - dependency
+    - relationship
+    - upstream
+    - downstream
 - pattern: skills/*.md
   required: false
   validators:
@@ -90,17 +106,20 @@ expected_outputs:
   required: true
   validators:
   - type: command-output-contains
-    command: 'python3 -c "import json,sys; g=json.load(open(''graph.json'')); nodes={n[''id''] for n in
-      g[''nodes'']}; edges=g[''edges'']; valid=all(e[''from''] in nodes and e[''to''] in nodes for e in
-      edges); connected={e[''from''] for e in edges}|{e[''to''] for e in edges}; orphans=nodes-connected;
-      print(''GRAPH_VALID'' if valid and len(nodes)==6 and len(edges)>=5 and not orphans else f''INVALID:
-      nodes={len(nodes)} edges={len(edges)} orphans={orphans}'')"'
+    command: 'python3 -c "import json,sys; g=json.load(open(''graph.json'')); nodes={n[''id''] for n in g[''nodes'']}; edges=g[''edges''];
+      valid=all(e[''from''] in nodes and e[''to''] in nodes for e in edges); connected={e[''from''] for e in edges}|{e[''to'']
+      for e in edges}; orphans=nodes-connected; print(''GRAPH_VALID'' if valid and len(nodes)==6 and len(edges)>=5 and not
+      orphans else f''INVALID: nodes={len(nodes)} edges={len(edges)} orphans={orphans}'')"'
     contains:
     - GRAPH_VALID
 expected_metrics:
-  tool_calls: [5, 13]
-  planning_ratio: [0.12, 0.32]
+  tool_calls:
+  - 4
+  - 13
+  planning_ratio:
+  - 0.12
+  - 0.32
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

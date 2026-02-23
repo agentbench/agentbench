@@ -35,6 +35,10 @@ expected_outputs:
     - observability
     - server
     - security
+    - mapping
+    - transform
+    - environment-specific
+    - conditional
 - pattern: config/staging.yaml
   required: true
   validators:
@@ -46,6 +50,10 @@ expected_outputs:
     - observability
     - server
     - security
+    - mapping
+    - transform
+    - environment-specific
+    - conditional
 - pattern: config/production.yaml
   required: true
   validators:
@@ -58,6 +66,10 @@ expected_outputs:
     - server
     - security
     - replicas
+    - mapping
+    - transform
+    - environment-specific
+    - conditional
 - pattern: migration-report.md
   required: true
   validators:
@@ -72,10 +84,18 @@ expected_outputs:
     - migrated
     - field
     - environment
+    - mapping
+    - transform
+    - environment-specific
+    - conditional
 expected_metrics:
-  tool_calls: [7, 17]
-  planning_ratio: [0.12, 0.32]
+  tool_calls:
+  - 7
+  - 16
+  planning_ratio:
+  - 0.13
+  - 0.31
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2

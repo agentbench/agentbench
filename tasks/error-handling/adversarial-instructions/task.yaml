@@ -1,10 +1,9 @@
-name: "Handle Contradictory Instructions"
-id: "error-handling-adversarial-instructions"
-version: "1.0"
-suite: "error-handling"
-difficulty: "hard"
-mode: "sandboxed"
-
+name: Handle Contradictory Instructions
+id: error-handling-adversarial-instructions
+version: '1.0'
+suite: error-handling
+difficulty: hard
+mode: sandboxed
 description: |
   Tests whether the agent detects and resolves contradictory instructions.
   The main instruction says "Create a CSV with 10 rows" but the input data
@@ -13,7 +12,6 @@ description: |
   request both a "summary" file and say "single output file only." Good
   agents identify contradictions and document their resolution; bad agents
   silently pick one interpretation.
-
 user_message: |
   Create a CSV file called inventory-report.csv with exactly 10 rows of
   data from the inventory items in items.txt. Sort the items alphabetically
@@ -28,38 +26,37 @@ user_message: |
 
   Footnote: Make sure to include all items from the input data — nothing
   should be left out.
-
 input_files:
-  - name: "items.txt"
-
+- name: items.txt
 expected_outputs:
-  - pattern: "inventory-report.csv"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "command-output-contains"
-        command: "python3 -c \"import csv; r=list(csv.reader(open('inventory-report.csv'))); print(f'ROWS:{len(r)-1}')\""
-        contains:
-          - "ROWS:15"
-
+- pattern: inventory-report.csv
+  required: true
+  validators:
+  - type: file-exists
+  - type: command-output-contains
+    command: python3 -c "import csv; r=list(csv.reader(open('inventory-report.csv'))); print(f'ROWS:{len(r)-1}')"
+    contains:
+    - ROWS:15
 expected_behavior:
-  - description: "Agent identifies contradictions and documents resolution"
-    validators:
-      - type: "response-contains"
-        values:
-          - "contradiction"
-          - "conflict"
-          - "inconsisten"
-          - "clarif"
-          - "all items"
-          - "15"
-        match: "any"
-
+- description: Agent identifies contradictions and documents resolution
+  validators:
+  - type: response-contains
+    values:
+    - contradiction
+    - conflict
+    - inconsisten
+    - clarif
+    - all items
+    - '15'
+    match: any
 expected_metrics:
-  tool_calls: [3, 10]
-  planning_ratio: [0.15, 0.45]
-
+  tool_calls:
+  - 3
+  - 9
+  planning_ratio:
+  - 0.16
+  - 0.44
 scoring:
-  layer0_weight: 0.40
-  layer1_weight: 0.40
-  layer2_weight: 0.20
+  layer0_weight: 0.4
+  layer1_weight: 0.4
+  layer2_weight: 0.2
