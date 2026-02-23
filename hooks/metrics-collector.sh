@@ -44,6 +44,8 @@ fi
 
 # Fall back run-id: prefer env var, then session_id, then "unknown"
 export AGENTBENCH_RUN_ID="${AGENTBENCH_RUN_ID:-${session_id:-unknown}}"
+# Metrics directory: prefer env var, otherwise use .agentbench-tmp/metrics/ in cwd
+export AGENTBENCH_METRICS_DIR="${AGENTBENCH_METRICS_DIR:-.agentbench-tmp/metrics}"
 
 # ---------------------------------------------------------------------------
 # Build a normalized event JSON based on the hook event type

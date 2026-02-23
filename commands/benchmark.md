@@ -63,12 +63,11 @@ Announce: `Starting AgentBench run {run-id} | Profile: {profile} | Suite version
 For each task:
 
 1. **Set up workspace**:
-   - If mode is "sandboxed": create `/tmp/agentbench-task-{task-id}/` as workspace
-   - If mode is "real": create `/tmp/agentbench-task-{task-id}/` as workspace (real-mode tasks still use isolated temp dirs, but allow full tool access)
+   - Create workspace in the current working directory (where the benchmark was started): `.agentbench-tmp/{task-id}/` as workspace
    - Copy input files from `${CLAUDE_PLUGIN_ROOT}/tasks/{suite}/{task}/inputs/` to the workspace (if inputs/ exists)
    - If the task directory contains a `setup.sh`: run `bash ${CLAUDE_PLUGIN_ROOT}/tasks/{suite}/{task}/setup.sh {workspace-path}` to scaffold the workspace. The setup script receives the workspace path as $1 and creates files, git repos, etc. inside it.
    - For validators that use `file-unchanged`: compute checksums of specified files now (after setup, before task-runner runs) and store them for comparison after scoring.
-   - Clear any previous task's metrics: run `rm -rf /tmp/agentbench-*/events.jsonl /tmp/agentbench-*/summary.json 2>/dev/null` to ensure fresh metrics for this task
+   - Clear any previous task's metrics: run `rm -rf .agentbench-tmp/metrics/ 2>/dev/null && mkdir -p .agentbench-tmp/metrics/` to ensure fresh metrics for this task
    - Set environment variable `AGENTBENCH_RUN_ID` to `{run-id}-{task-id}`
 
 2. **Announce**: Tell the user which task is running:
@@ -82,8 +81,8 @@ For each task:
    - Do NOT pass expected_outputs, validators, or scoring info to the task-runner
 
 3b. **Compute metrics summary** after task-runner completes:
-   - Find the metrics directory: `ls -td /tmp/agentbench-*/ 2>/dev/null | head -1`
-   - If it contains `events.jsonl`, run: `bash ${CLAUDE_PLUGIN_ROOT}/lib/compute-summary.sh` (which reads events.jsonl and writes summary.json in the same directory)
+   - Check `.agentbench-tmp/metrics/` for `events.jsonl`
+   - If it exists, run: `bash ${CLAUDE_PLUGIN_ROOT}/lib/compute-summary.sh .agentbench-tmp/metrics/`
    - If no events.jsonl found, metrics will be unavailable for this task
 
 4. **Layer 0 — Automated Structural Checks** (you compute this directly):
@@ -100,10 +99,7 @@ For each task:
    - Normalize the total to 0-100 scale.
 
 5. **Layer 1 — Metrics Analysis** (you compute this directly):
-   - Hooks write metrics using the Claude session ID. Find the metrics directory by running:
-     `ls -td /tmp/agentbench-*/ 2>/dev/null | head -1`
-     Or check `/tmp/agentbench-unknown/` as fallback.
-   - Read the metrics summary (`summary.json`) from that directory
+   - Read the metrics summary from `.agentbench-tmp/metrics/summary.json`
    - If metrics are available and task has expected_metrics:
      - Tool calls within expected range: 40 points
      - Tool calls within 2x expected range: 20 points
@@ -118,7 +114,7 @@ For each task:
    - If no metrics available (hooks didn't fire), score as 50 with a note
 
 6. **Layer 2 — Behavioral Analysis** (you compute this directly from the JSONL events log):
-   Read events from the same metrics directory found in Layer 1 (`events.jsonl`)
+   Read events from `.agentbench-tmp/metrics/events.jsonl`
    
    Start at 100 points, apply penalties:
    
@@ -188,7 +184,7 @@ After all tasks complete:
 ### Step 6: Clean Up
 
 If the task directory contains a `teardown.sh`: run `bash ${CLAUDE_PLUGIN_ROOT}/tasks/{suite}/{task}/teardown.sh {workspace-path}` for any custom cleanup.
-If --keep-workspace was NOT specified, remove temp workspace directories under /tmp/agentbench-task-*.
+If --keep-workspace was NOT specified, remove the entire `.agentbench-tmp/` directory: `rm -rf .agentbench-tmp/`
 Always keep the agentbench-results/ directory.
 
 ## Error Handling

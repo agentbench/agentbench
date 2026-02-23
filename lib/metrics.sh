@@ -5,10 +5,9 @@
 # Sourced by hooks/metrics-collector.sh and the orchestrator command.
 
 # Determine the metrics directory for the current run
-# Uses AGENTBENCH_RUN_ID env var if set, otherwise "unknown"
+# Uses AGENTBENCH_METRICS_DIR env var if set, otherwise falls back to .agentbench-tmp/metrics/ in cwd
 agentbench_metrics_dir() {
-  local run_id="${AGENTBENCH_RUN_ID:-unknown}"
-  echo "/tmp/agentbench-${run_id}"
+  echo "${AGENTBENCH_METRICS_DIR:-.agentbench-tmp/metrics}"
 }
 
 # Return the path to the JSONL event log
