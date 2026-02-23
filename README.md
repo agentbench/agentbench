@@ -18,7 +18,7 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 /benchmark --suite research --fast      # Run easy+medium tasks in one domain
 /benchmark --task research-summarize-doc # Run one task
 /benchmark --mode real                  # Test your real environment
-/benchmark --strict                     # Tag results as self-scored in output JSON
+/benchmark --strict                     # Tag results with deterministic scoring method
 ```
 
 ## Commands

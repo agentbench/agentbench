@@ -36,7 +36,7 @@ Walk the user through each step, one question at a time:
 
 10. **Expected Metrics**: What tool call range is reasonable? What planning ratio?
 
-11. **Scoring Weights**: Use defaults (L0=0.15, L1=0.25, L2=0.25, L3=0.35) or customize?
+11. **Scoring Weights**: Use defaults (L0=0.40, L1=0.40, L2=0.20) or customize?
 
 ## Output
 
