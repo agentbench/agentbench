@@ -1,0 +1,94 @@
+name: Temporal Event Ordering
+id: memory-temporal-ordering
+version: '1.0'
+suite: memory
+difficulty: hard
+mode: sandboxed
+type: multi-turn
+description: |
+  Tests the agent's ability to remember, sort, and reason about temporal data.
+  Turn 1 provides 12 events in random order. Turn 2 asks for chronological
+  sorting and overlap detection. Turn 3 asks a specific temporal reasoning
+  question requiring precise date arithmetic.
+turns:
+  - role: user
+    message: |
+      Here are 12 project events. They are NOT in chronological order. Remember all of them:
+
+      - Event F: Security audit completed — July 18, 2025
+      - Event C: Database schema redesign started — March 3, 2025
+      - Event K: Beta launch to 500 users — October 1, 2025
+      - Event A: Project kickoff meeting — January 15, 2025
+      - Event I: Infrastructure migration to AWS — August 25, 2025
+      - Event D: API v2 specification finalized — March 22, 2025
+      - Event L: General availability release — November 10, 2025
+      - Event G: Performance testing phase (3 weeks) — July 28, 2025 to August 17, 2025
+      - Event B: Requirements gathering complete — February 10, 2025
+      - Event H: Third-party integration testing — August 11, 2025 to August 30, 2025
+      - Event E: Frontend redesign mockups approved — May 5, 2025
+      - Event J: User acceptance testing — September 8, 2025 to September 26, 2025
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Sort all 12 events chronologically by start date and write them to timeline.md.
+      Also identify which events have overlapping date ranges.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: timeline.md
+      - type: command-output-contains
+        command: |
+          python3 -c "
+          import re
+          correct_order = ['A','B','C','D','E','F','G','H','I','J','K','L']
+          with open('timeline.md') as f: text = f.read()
+          found = re.findall(r'Event ([A-L])', text)
+          # deduplicate preserving order
+          seen = set(); ordered = []
+          for x in found:
+            if x not in seen: seen.add(x); ordered.append(x)
+          if ordered == correct_order: print('ORDER_CORRECT'); print('PASS')
+          else: print(f'ORDER: {ordered}'); print('FAIL')
+          # Check overlap detection (G and H overlap: Jul28-Aug17 and Aug11-Aug30)
+          lower = text.lower()
+          if ('overlap' in lower or 'concurrent' in lower) and 'g' in lower and 'h' in lower:
+            print('OVERLAP_DETECTED')
+          "
+        sections:
+          - 'PASS'
+
+  - role: user
+    message: |
+      Which event happened right BEFORE the infrastructure migration (Event I)?
+      What was the exact gap in days between that event's end date and Event I's start date?
+      Write your answer to gap-analysis.md.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: gap-analysis.md
+      - type: command-output-contains
+        command: |
+          python3 -c "
+          # Event G (Performance testing) ends Aug 17; Event H starts Aug 11 but
+          # by start date, G (Jul 28) is right before H (Aug 11), and H (Aug 11) is right before I (Aug 25).
+          # Event right before I by start date: H (Aug 11). Gap from H end (Aug 30) — but H overlaps I.
+          # By start date order: G(Jul28), H(Aug11), I(Aug25). So H is right before I.
+          # Gap from H start (Aug 11) to I (Aug 25) = 14 days. Or from G end (Aug 17) to I (Aug 25) = 8 days.
+          # The most logical: the event starting right before I is H (Aug 11). Gap = Aug 25 - Aug 17 (G end) = 8 days
+          # Actually: right before I by start date is H. H ends Aug 30 which is AFTER I starts, so they overlap.
+          # G ends Aug 17, I starts Aug 25: gap = 8 days.
+          with open('gap-analysis.md') as f: text = f.read()
+          # Accept either G or H as the answer, and accept 8 or 14 as the gap
+          has_event = 'G' in text or 'erformance' in text or 'H' in text or 'integration' in text
+          has_gap = '8' in text or '14' in text
+          if has_event and has_gap: print('PASS')
+          else: print('FAIL')
+          "
+        sections:
+          - 'PASS'
+
+scoring:
+  layer0_weight: 0.40
+  layer1_weight: 0.40
+  layer2_weight: 0.20

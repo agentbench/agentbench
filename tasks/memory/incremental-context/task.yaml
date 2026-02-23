@@ -1,0 +1,92 @@
+name: Incremental Specification Building
+id: memory-incremental-context
+version: '1.0'
+suite: memory
+difficulty: expert
+mode: sandboxed
+type: multi-turn
+description: |
+  Tests the agent's ability to accumulate requirements across 6 turns and
+  produce a complete specification incorporating all details. Each turn adds
+  new requirements. The final turn asks for a complete document that must
+  contain specific values from every previous turn.
+turns:
+  - role: user
+    message: |
+      We're designing an authentication system. First requirement:
+      The system should handle user authentication with email/password login.
+      Support account creation, password reset, and session management.
+      Acknowledge and remember this.
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Additional requirement: Add OAuth2 support with Google and GitHub as
+      identity providers. Users should be able to link multiple OAuth providers
+      to a single account. Acknowledge.
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      More details: The session timeout should be 30 minutes for inactive sessions.
+      Refresh tokens should be valid for 7 days. Access tokens expire after 15 minutes.
+      Acknowledge.
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Security requirement: Add rate limiting — maximum 10 login attempts per minute
+      per IP address. After exceeding the limit, block the IP for 15 minutes.
+      Failed attempts should be logged to a security audit trail. Acknowledge.
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Final feature: Add MFA support via TOTP (Time-based One-Time Password),
+      compatible with Google Authenticator and Authy. Users can optionally
+      enable MFA. Recovery codes (8 single-use codes) should be generated
+      when MFA is enabled. Acknowledge.
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Now write the complete technical specification incorporating ALL requirements
+      from our previous 5 discussions. Save it to auth-spec.md.
+      Include every specific value and detail mentioned.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: auth-spec.md
+      - type: command-output-contains
+        command: |
+          python3 -c "
+          with open('auth-spec.md') as f: text = f.read().lower()
+          terms = [
+            'oauth2', 'google', 'github', '30 minute', '7 day', '15 minute',
+            '10', 'per minute', 'per ip', 'totp', 'google authenticator',
+            'recovery code'
+          ]
+          found = [t for t in terms if t in text]
+          missing = [t for t in terms if t not in text]
+          print(f'Found {len(found)}/12: {found}')
+          if missing: print(f'Missing: {missing}')
+          if len(found) >= 10: print('PASS')
+          else: print('FAIL')
+          "
+        sections:
+          - 'PASS'
+      - type: content-contains
+        sections:
+          - OAuth2
+          - Google
+          - GitHub
+          - 30 minute
+          - 7 day
+          - TOTP
+          - rate limit
+          - MFA
+
+scoring:
+  layer0_weight: 0.40
+  layer1_weight: 0.40
+  layer2_weight: 0.20

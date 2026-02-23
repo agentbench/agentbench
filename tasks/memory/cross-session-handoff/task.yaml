@@ -1,0 +1,97 @@
+name: Cross-Session Project Handoff
+id: memory-cross-session-handoff
+version: '1.0'
+suite: memory
+difficulty: expert
+mode: sandboxed
+type: multi-turn
+description: |
+  Simulates a project handoff between sessions. Turn 1 provides detailed
+  session notes with 10 action items, 5 blockers, and 3 decisions made.
+  Turn 2 is a distraction task. Turn 3 asks the agent to recall blockers
+  and specific decisions. Tests cross-context memory retention.
+turns:
+  - role: user
+    message: |
+      Here are the notes from yesterday's session on Project Meridian. Please internalize all of this:
+
+      ## Action Items
+      1. Migrate user-auth service to Rust — assigned to Kevin Park, due Friday
+      2. Write integration tests for payment gateway — assigned to Lisa Nguyen
+      3. Update API docs for v3 endpoints — assigned to Tom Bradley
+      4. Set up staging environment on GCP us-central1 — assigned to DevOps
+      5. Review and merge PR #847 (cart refactor) — assigned to Sarah Kim
+      6. Benchmark Redis vs Memcached for session store — assigned to Alex Torres
+      7. Fix flaky test in CI pipeline (test_checkout_flow) — assigned to QA team
+      8. Draft data retention policy for CCPA compliance — assigned to Legal
+      9. Schedule load test for 50K concurrent users — assigned to Performance team
+      10. Rotate AWS access keys for production — assigned to Security, URGENT
+
+      ## Blockers
+      1. **Stripe webhook endpoint** returning 502 intermittently — waiting on Stripe support ticket #STR-44821
+      2. **Kubernetes HPA** not scaling beyond 12 pods — suspected resource quota limit in namespace
+      3. **Database migration #47** (add index on orders.customer_id) — blocked by table lock during peak hours, need maintenance window
+      4. **Third-party geocoding API** (MapBox) rate limit hit — need enterprise tier upgrade, PO pending approval ($12K/year)
+      5. **iOS app build** failing on Xcode 15.2 — dependency conflict with CocoaPods, DevOps investigating
+
+      ## Decisions Made
+      1. **Database migration strategy**: We decided to use pglogical for zero-downtime migration instead of pg_dump/restore. This avoids the 4-hour maintenance window.
+      2. **Authentication provider**: Switching from Auth0 to Keycloak (self-hosted) to reduce costs. Migration timeline: 6 weeks starting Feb 1.
+      3. **Caching layer**: Going with Redis Cluster (6 nodes, 256GB) over Memcached. Decision based on need for persistence and pub/sub features.
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Quick unrelated task: Write a haiku about cloud computing. Save it to haiku.txt.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: haiku.txt
+
+  - role: user
+    message: |
+      Let's continue from where we left off on Project Meridian.
+      I need you to write a status-report.md covering:
+      1. What are ALL 5 blockers and their current status?
+      2. What were the 3 key decisions made, with details?
+      3. Specifically: what was decided about the database migration approach?
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: status-report.md
+      - type: content-contains
+        sections:
+          - Stripe
+          - STR-44821
+          - 502
+          - Kubernetes
+          - '12 pods'
+          - 'migration #47'
+          - customer_id
+          - MapBox
+          - '$12K'
+          - Xcode 15.2
+          - CocoaPods
+          - pglogical
+          - zero-downtime
+          - Auth0
+          - Keycloak
+          - Redis Cluster
+          - 256GB
+      - type: command-output-contains
+        command: |
+          python3 -c "
+          with open('status-report.md') as f: text = f.read().lower()
+          decisions = ['pglogical', 'keycloak', 'redis cluster']
+          found = sum(1 for d in decisions if d.lower() in text)
+          print(f'Decisions found: {found}/3')
+          if found == 3: print('PASS')
+          else: print('FAIL')
+          "
+        sections:
+          - 'PASS'
+
+scoring:
+  layer0_weight: 0.40
+  layer1_weight: 0.40
+  layer2_weight: 0.20

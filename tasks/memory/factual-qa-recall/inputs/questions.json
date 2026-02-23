@@ -1,0 +1,17 @@
+[
+  {"id": 1, "question": "What is the Q3 budget allocation for the infrastructure team?", "answer": "$847,000"},
+  {"id": 2, "question": "Who is the Chief Architect leading the project?", "answer": "Dr. Elena Vasquez"},
+  {"id": 3, "question": "How many microservices need to be migrated?", "answer": "137"},
+  {"id": 4, "question": "What is the total approved project budget?", "answer": "$4,230,000"},
+  {"id": 5, "question": "What is the contract value for CloudMatrix Inc.?", "answer": "$186,000/year"},
+  {"id": 6, "question": "How many partitions per topic are configured for Kafka?", "answer": "12"},
+  {"id": 7, "question": "What is the API response time P95 target?", "answer": "180ms"},
+  {"id": 8, "question": "Who is the Data Team lead?", "answer": "Carlos Mendez"},
+  {"id": 9, "question": "What is the system uptime SLA target?", "answer": "99.99%"},
+  {"id": 10, "question": "When is the CloudMatrix contract renewal date?", "answer": "June 15, 2025"},
+  {"id": 11, "question": "What is the GitLab CI pipeline ID?", "answer": "PHX-CI-9927"},
+  {"id": 12, "question": "How much data needs to be migrated?", "answer": "2.4 petabytes"},
+  {"id": 13, "question": "What is the maximum failover time target?", "answer": "45 seconds"},
+  {"id": 14, "question": "How many engineers are on the Security Team?", "answer": "6"},
+  {"id": 15, "question": "What is the Phase 2 completion deadline?", "answer": "June 30, 2025"}
+]

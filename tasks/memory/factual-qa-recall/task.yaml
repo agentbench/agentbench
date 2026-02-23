@@ -1,0 +1,60 @@
+name: Factual QA Recall from Briefing
+id: memory-factual-qa-recall
+version: '1.0'
+suite: memory
+difficulty: hard
+mode: sandboxed
+type: multi-turn
+description: |
+  Tests precise factual recall from a dense project briefing document.
+  Turn 1 provides a 2-page briefing with 30+ specific facts (names, dates,
+  budgets, tech choices, vendor details). Turn 2 asks 15 specific questions
+  each with one correct answer. Validates that the agent can recall at least
+  12 of 15 facts accurately using deterministic answer checking.
+setup_script: setup.sh
+input_files:
+  - name: briefing.md
+  - name: questions.json
+turns:
+  - role: user
+    message: |
+      Read the file briefing.md carefully. It contains the full executive briefing
+      for Project Phoenix. Memorize every detail — I will quiz you on specific facts
+      afterward. Confirm you've read and understood it.
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Now answer each question in questions.json. Write your answers to a file
+      called answers.json in the same format: an array of objects with "id" and
+      "answer" fields. Be as precise as possible — use exact values from the briefing.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: answers.json
+      - type: command-output-contains
+        command: |
+          python3 -c "
+          import json, sys
+          with open('.answers-key.json') as f: key = {q['id']: q['answer'] for q in json.load(f)}
+          try:
+            with open('answers.json') as f: ans = {q['id']: q['answer'] for q in json.load(f)}
+          except: print('FAIL: cannot parse answers.json'); sys.exit(0)
+          correct = 0
+          for qid, expected in key.items():
+            given = ans.get(qid, '')
+            exp_lower = expected.lower().replace('$','').replace(',','').replace('/year','')
+            giv_lower = given.lower().replace('$','').replace(',','').replace('/year','')
+            if exp_lower in giv_lower or giv_lower in exp_lower:
+              correct += 1
+          print(f'SCORE: {correct}/15')
+          if correct >= 12: print('PASS')
+          else: print('FAIL')
+          "
+        sections:
+          - 'PASS'
+
+scoring:
+  layer0_weight: 0.40
+  layer1_weight: 0.40
+  layer2_weight: 0.20

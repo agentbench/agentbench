@@ -1,0 +1,93 @@
+name: Noise vs Signal Filtering
+id: memory-noise-vs-signal
+version: '1.0'
+suite: memory
+difficulty: hard
+mode: sandboxed
+type: multi-turn
+description: |
+  Tests the agent's ability to distinguish relevant project information from
+  casual conversation noise. Provides 20 pieces of information (8 signal,
+  12 noise) and asks for a summary of only the relevant technical decisions.
+turns:
+  - role: user
+    message: |
+      Here's a transcript of our team standup. I need you to remember all of it:
+
+      1. We decided to use GraphQL instead of REST for the new customer portal API.
+      2. Did anyone try the new coffee machine on the 3rd floor? It makes amazing lattes.
+      3. The deployment target is Kubernetes on EKS with Fargate serverless nodes.
+      4. I heard parking lot B is getting resurfaced next month — might need to park elsewhere.
+      5. Database choice is finalized: Amazon Aurora PostgreSQL with read replicas in 3 AZs.
+      6. Sarah's birthday is next Thursday, we should organize something.
+      7. The frontend will use Next.js 14 with server-side rendering for SEO optimization.
+      8. Has anyone watched that new sci-fi show on Netflix? The one about time loops?
+      9. We're adopting Terraform for all infrastructure-as-code, replacing CloudFormation.
+      10. The office air conditioning has been acting up again — facilities said they'd fix it by Friday.
+      11. Authentication will use Cognito with SAML federation for enterprise SSO customers.
+      12. Did you guys see the game last night? What a comeback in the fourth quarter!
+      13. Weekend plans — anyone up for hiking at Eagle Creek on Saturday?
+      14. The caching strategy uses CloudFront for static assets and ElastiCache Redis for API responses.
+      15. My kid's school play is this Wednesday, might leave early.
+      16. CI/CD pipeline will run on GitHub Actions with self-hosted runners for security scanning.
+      17. The vending machine in the break room is out of sparkling water again.
+      18. I'm thinking about getting a new standing desk — any recommendations?
+      19. Message broker decision: Amazon MSK (managed Kafka) for event-driven architecture.
+      20. Load testing target: the system must handle 15,000 concurrent WebSocket connections.
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Based on our standup discussion, write a project-summary.md with ONLY the
+      relevant technical decisions. No small talk, no personal stuff — just the
+      architecture and technology choices.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: project-summary.md
+      - type: content-contains
+        sections:
+          - GraphQL
+          - Kubernetes
+          - EKS
+          - Aurora PostgreSQL
+          - Next.js
+          - Terraform
+          - Cognito
+          - SAML
+          - CloudFront
+          - ElastiCache
+          - GitHub Actions
+          - MSK
+          - Kafka
+          - 15,000
+      - type: content-not-contains
+        sections:
+          - coffee machine
+          - parking lot
+          - birthday
+          - Netflix
+          - air conditioning
+          - game last night
+          - hiking
+          - school play
+          - vending machine
+          - standing desk
+      - type: command-output-contains
+        command: |
+          python3 -c "
+          with open('project-summary.md') as f: text = f.read()
+          signals = ['GraphQL', 'Kubernetes', 'Aurora', 'Next.js', 'Terraform', 'Cognito', 'CloudFront', 'MSK']
+          noise = ['coffee machine', 'parking lot', 'birthday', 'Netflix', 'air conditioning', 'hiking', 'vending machine', 'standing desk']
+          sig_count = sum(1 for s in signals if s in text)
+          noise_count = sum(1 for n in noise if n.lower() in text.lower())
+          if sig_count >= 7 and noise_count == 0: print('PASS')
+          else: print(f'FAIL: signals={sig_count}/8 noise={noise_count}')
+          "
+        sections:
+          - 'PASS'
+
+scoring:
+  layer0_weight: 0.40
+  layer1_weight: 0.40
+  layer2_weight: 0.20

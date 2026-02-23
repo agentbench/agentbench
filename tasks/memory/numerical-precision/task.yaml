@@ -1,0 +1,92 @@
+name: Numerical Precision Recall
+id: memory-numerical-precision
+version: '1.0'
+suite: memory
+difficulty: hard
+mode: sandboxed
+type: multi-turn
+description: |
+  Tests the agent's ability to recall and compute with specific numerical
+  values from a financial report. Includes distraction between memorization
+  and recall, then asks for both direct recall and computed values.
+setup_script: setup.sh
+input_files:
+  - name: financial-report.md
+turns:
+  - role: user
+    message: |
+      Read financial-report.md carefully. It contains TechNova Corp's Q3 2025
+      financial report with revenue figures, costs, margins, growth rates,
+      and headcount data. Memorize all the numbers — I'll ask about them later.
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Unrelated task: Write a bash script called cleanup.sh that finds and deletes
+      all .tmp files older than 7 days in /var/log. Include proper error handling
+      and a dry-run mode flag.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: cleanup.sh
+
+  - role: user
+    message: |
+      From the financial report: What is the total Q3 revenue across all regions?
+      What is the average margin across gross, operating, net, and EBITDA margins?
+      Write your answers with calculations to financial-answers.md.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: financial-answers.md
+      - type: command-output-contains
+        command: |
+          python3 -c "
+          import re
+          with open('financial-answers.md') as f: text = f.read()
+          # Total Q3 revenue: $28,940,000
+          nums = re.findall(r'[\$]?([\d,]+(?:\.\d+)?)', text.replace(' ',''))
+          nums_clean = [float(n.replace(',','')) for n in nums if float(n.replace(',','')) > 1000]
+          has_revenue = any(abs(n - 28940000) / 28940000 < 0.01 for n in nums_clean)
+          # Average margin: (62.4 + 16.0 + 11.8 + 22.3) / 4 = 28.125
+          all_nums = re.findall(r'([\d]+\.[\d]+)', text)
+          all_floats = [float(n) for n in all_nums]
+          has_avg_margin = any(abs(n - 28.125) / 28.125 < 0.05 for n in all_floats)
+          if has_revenue and has_avg_margin: print('PASS')
+          elif has_revenue: print('PARTIAL: revenue correct, margin wrong')
+          else: print('FAIL')
+          "
+        sections:
+          - 'PASS'
+
+  - role: user
+    message: |
+      What was the exact headcount for the engineering team in the London office?
+      Also, what percentage of total company headcount does the London office represent?
+      Write to headcount-answers.md.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: headcount-answers.md
+      - type: command-output-contains
+        command: |
+          python3 -c "
+          import re
+          with open('headcount-answers.md') as f: text = f.read()
+          # London engineering: 53, London total: 89, Company total: 434
+          # London % = 89/434 = 20.51%
+          has_53 = '53' in text
+          pcts = re.findall(r'([\d]+\.[\d]+)', text)
+          pct_floats = [float(p) for p in pcts]
+          has_pct = any(abs(p - 20.51) < 1.0 for p in pct_floats) or '20.5' in text or '20%' in text
+          if has_53 and has_pct: print('PASS')
+          elif has_53: print('PARTIAL: headcount correct')
+          else: print('FAIL')
+          "
+        sections:
+          - 'PASS'
+
+scoring:
+  layer0_weight: 0.40
+  layer1_weight: 0.40
+  layer2_weight: 0.20

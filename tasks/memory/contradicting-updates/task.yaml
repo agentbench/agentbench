@@ -1,0 +1,106 @@
+name: Contradicting Information Updates
+id: memory-contradicting-updates
+version: '1.0'
+suite: memory
+difficulty: expert
+mode: sandboxed
+type: multi-turn
+description: |
+  Tests whether the agent correctly overwrites outdated information when
+  given updates. Initial facts are provided, then updated across turns with
+  distractions in between. The final output must reflect ONLY the latest
+  values, not the original ones.
+turns:
+  - role: user
+    message: |
+      I'm building API documentation. Here are the current specs:
+      - Base URL: https://api.acmecorp.com/v2/users
+      - Rate limit: 100 requests/min per API key
+      - Authentication: Bearer token via X-Auth-Token header
+      - Response format: JSON with envelope wrapper
+      - Pagination: offset-based, max 50 items per page
+      - Timeout: 30 seconds
+      Please acknowledge these specs.
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Unrelated task: Write a Python function called fibonacci(n) that returns the
+      nth Fibonacci number using memoization. Save it to fibonacci.py.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: fibonacci.py
+
+  - role: user
+    message: |
+      Important update to the API specs:
+      - Base URL changed to: https://api.acmecorp.com/v3/accounts
+      - Rate limit increased to: 250 requests/min per API key
+      - Authentication changed to: OAuth2 Bearer token via Authorization header
+      - Pagination changed to: cursor-based, max 100 items per page
+      The response format and timeout remain the same.
+      Please acknowledge these updates.
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Another unrelated task: Review this code and suggest improvements.
+      Save your review to code-review.md.
+
+      ```python
+      def process(data):
+          result = []
+          for i in range(len(data)):
+              if data[i] > 0:
+                  result.append(data[i] * 2)
+          return result
+      ```
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: code-review.md
+
+  - role: user
+    message: |
+      Now write the complete API documentation reflecting the CURRENT state of all specs.
+      Save it to api-docs.md. Make sure every detail is up to date.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: api-docs.md
+      - type: content-contains
+        sections:
+          - /v3/accounts
+          - '250'
+          - OAuth2
+          - Authorization
+          - cursor-based
+          - '100 items'
+          - '30 seconds'
+          - JSON
+      - type: content-not-contains
+        sections:
+          - /v2/users
+          - 100 requests/min
+          - X-Auth-Token
+          - offset-based
+          - 50 items per page
+      - type: command-output-contains
+        command: |
+          python3 -c "
+          with open('api-docs.md') as f: text = f.read()
+          current = ['/v3/accounts', '250', 'OAuth2', 'cursor']
+          old = ['/v2/users', 'X-Auth-Token', 'offset-based']
+          has_current = all(c in text for c in current)
+          has_old = any(o in text for o in old)
+          if has_current and not has_old: print('PASS')
+          else: print('FAIL: current=' + str(has_current) + ' old_absent=' + str(not has_old))
+          "
+        sections:
+          - 'PASS'
+
+scoring:
+  layer0_weight: 0.40
+  layer1_weight: 0.40
+  layer2_weight: 0.20

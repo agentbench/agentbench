@@ -1,0 +1,99 @@
+name: Selective Project Recall
+id: memory-selective-recall
+version: '1.0'
+suite: memory
+difficulty: hard
+mode: sandboxed
+type: multi-turn
+description: |
+  Tests the agent's ability to selectively recall information about one
+  specific project out of three, without leaking details from the others.
+  Validates both presence of correct info and absence of other projects' data.
+turns:
+  - role: user
+    message: |
+      I manage three projects. Here are the details for each:
+
+      **Project Alpha**
+      - Budget: $720K
+      - Team lead: Michael Torres
+      - Deadline: April 22, 2025
+      - Status: Behind schedule, 2 sprints delayed
+      - Tech stack: Java Spring Boot + Oracle DB
+      - Team size: 18 engineers
+      - Key risk: Oracle license renewal at $240K
+
+      **Project Beta**
+      - Budget: $340K
+      - Team lead: Sarah Chen
+      - Deadline: March 15, 2025
+      - Status: On track, 78% complete
+      - Tech stack: Go + PostgreSQL + Redis
+      - Team size: 11 engineers
+      - Key risk: Redis cluster failover not tested
+
+      **Project Gamma**
+      - Budget: $1.2M
+      - Team lead: David Okonkwo
+      - Deadline: August 8, 2025
+      - Status: In planning phase, architecture review pending
+      - Tech stack: Rust + ScyllaDB + Kafka
+      - Team size: 25 engineers
+      - Key risk: ScyllaDB expertise gap, need 3 more hires
+    expect: acknowledgment
+
+  - role: user
+    message: |
+      Unrelated task: Create a .gitignore file for a Python project.
+      Include common patterns for venv, __pycache__, .env, etc.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: .gitignore
+
+  - role: user
+    message: |
+      Give me ONLY the details about Project Beta. Don't include any information
+      about Alpha or Gamma. Write it to project-beta.md.
+    expect: file-output
+    validators:
+      - type: file-exists
+        pattern: project-beta.md
+      - type: content-contains
+        sections:
+          - '$340K'
+          - Sarah Chen
+          - March 15
+          - '78%'
+          - PostgreSQL
+          - Redis
+          - '11'
+      - type: content-not-contains
+        sections:
+          - '$720K'
+          - Michael Torres
+          - April 22
+          - Oracle
+          - '$1.2M'
+          - David Okonkwo
+          - August 8
+          - ScyllaDB
+          - Rust
+      - type: command-output-contains
+        command: |
+          python3 -c "
+          with open('project-beta.md') as f: text = f.read()
+          beta_markers = ['340', 'Sarah Chen', 'March 15', 'Go', 'PostgreSQL']
+          other_markers = ['720', 'Michael Torres', '1.2M', 'David Okonkwo', 'ScyllaDB', 'Oracle']
+          has_beta = sum(1 for m in beta_markers if m in text)
+          has_other = sum(1 for m in other_markers if m in text)
+          if has_beta >= 4 and has_other == 0: print('PASS')
+          else: print(f'FAIL: beta={has_beta}/5 other={has_other}/6')
+          "
+        sections:
+          - 'PASS'
+
+scoring:
+  layer0_weight: 0.40
+  layer1_weight: 0.40
+  layer2_weight: 0.20
