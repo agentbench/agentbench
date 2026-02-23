@@ -1,0 +1,17 @@
+Inventory Items (as of 2025-01-15)
+
+1. ITM-001 | Wireless Mouse | Electronics | Qty: 234 | $29.99 | Added: 2024-03-15
+2. ITM-002 | Standing Desk | Furniture | Qty: 45 | $549.00 | Added: 2024-01-20
+3. ITM-003 | USB-C Hub | Electronics | Qty: 189 | $44.99 | Added: 2024-06-01
+4. ITM-004 | Ergonomic Chair | Furniture | Qty: 78 | $399.00 | Added: 2024-02-10
+5. ITM-005 | Monitor Stand | Accessories | Qty: 312 | $34.99 | Added: 2024-04-22
+6. ITM-006 | Webcam HD | Electronics | Qty: 156 | $79.99 | Added: 2024-05-15
+7. ITM-007 | Desk Lamp | Accessories | Qty: 267 | $24.99 | Added: 2024-07-03
+8. ITM-008 | Keyboard Mechanical | Electronics | Qty: 198 | $89.99 | Added: 2024-08-11
+9. ITM-009 | Filing Cabinet | Furniture | Qty: 34 | $199.00 | Added: 2024-09-05
+10. ITM-010 | Noise Cancelling Headphones | Electronics | Qty: 145 | $199.99 | Added: 2024-10-18
+11. ITM-011 | Whiteboard | Accessories | Qty: 89 | $49.99 | Added: 2024-11-02
+12. ITM-012 | Cable Management Kit | Accessories | Qty: 423 | $14.99 | Added: 2024-11-20
+13. ITM-013 | Laptop Stand | Accessories | Qty: 178 | $39.99 | Added: 2024-12-01
+14. ITM-014 | Wireless Charger | Electronics | Qty: 267 | $19.99 | Added: 2024-12-15
+15. ITM-015 | Desk Organizer | Accessories | Qty: 345 | $22.99 | Added: 2025-01-05

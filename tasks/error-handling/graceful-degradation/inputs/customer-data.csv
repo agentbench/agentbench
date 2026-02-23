@@ -1,0 +1,51 @@
+Customer_ID,Name,Region,Order_Count,Total_Spent
+CUST-0001,Customer 1,Asia Pacific,11,1026.71
+CUST-0002,Customer 2,Europe,4,1497.01
+CUST-0003,Customer 3,Europe,5,2801.66
+CUST-0004,Customer 4,North America,9,190.34
+CUST-0005,Customer 5,Latin America,6,3972.57
+CUST-0006,Customer 6,Europe,17,4988.74
+CUST-0007,Customer 7,Latin America,6,1690.87
+CUST-0008,Customer 8,North America,3,2777.39
+CUST-0009,Customer 9,Asia Pacific,18,2374.84
+CUST-0010,Customer 10,Europe,7,405.82
+CUST-0011,Customer 11,Europe,23,2822.52
+CUST-0012,Customer 12,Latin America,20,3536.09
+CUST-0013,Customer 13,North America,4,4205.46
+CUST-0014,Customer 14,Europe,24,1677.94
+CUST-0015,Customer 15,North America,4,2905.6
+CUST-0016,Customer 16,North America,18,4867.57
+CUST-0017,Customer 17,Asia Pacific,15,3153.99
+CUST-0018,Customer 18,North America,12,4687.42
+CUST-0019,Customer 19,North America,25,4871.4
+CUST-0020,Customer 20,Europe,8,2884.68
+CUST-0021,Customer 21,Latin America,24,734.8
+CUST-0022,Customer 22,Latin America,1,4738.85
+CUST-0023,Customer 23,North America,2,2504.27
+CUST-0024,Customer 24,North America,24,1822.36
+CUST-0025,Customer 25,Latin America,4,1317.4
+CUST-0026,Customer 26,Latin America,2,3270.73
+CUST-0027,Customer 27,North America,5,1526.26
+CUST-0028,Customer 28,North America,1,4225.35
+CUST-0029,Customer 29,Asia Pacific,25,2106.62
+CUST-0030,Customer 30,North America,2,3980.87
+CUST-0031,Customer 31,Europe,25,4151.99
+CUST-0032,Customer 32,North America,23,90.63
+CUST-0033,Customer 33,North America,22,4625.49
+CUST-0034,Customer 34,North America,13,4873.57
+CUST-0035,Customer 35,North America,5,1234.92
+CUST-0036,Customer 36,Europe,25,4196.22
+CUST-0037,Customer 37,Europe,6,788.33
+CUST-0038,Customer 38,North America,8,3368.57
+CUST-0039,Customer 39,Latin America,19,3574.66
+CUST-0040,Customer 40,Latin America,16,2556.63
+CUST-0041,Customer 41,North America,16,3127.84
+CUST-0042,Customer 42,Asia Pacific,18,1417.47
+CUST-0043,Customer 43,Latin America,7,140.59
+CUST-0044,Customer 44,Latin America,3,226.48
+CUST-0045,Customer 45,Europe,1,495.21
+CUST-0046,Customer 46,North America,17,1059.94
+CUST-0047,Customer 47,North America,25,2154.57
+CUST-0048,Customer 48,North America,22,1952.3
+CUST-0049,Customer 49,Latin America,16,2686.02
+CUST-0050,Customer 50,Latin America,7,4392.56

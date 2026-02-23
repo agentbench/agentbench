@@ -1,0 +1,42 @@
+Acme Global Industries - Organizational Structure
+
+CEO: Patricia Okonkwo
+  Reports directly to Board of Directors (7 members)
+
+Engineering Division (led by VP Engineering Robert Zhao):
+  - Platform Team: 12 engineers, led by Senior Director Maya Patel
+    - Backend squad: 5 engineers
+    - Infrastructure squad: 4 engineers  
+    - DevOps squad: 3 engineers
+  - Product Team: 18 engineers, led by Senior Director Ahmed Hassan
+    - Mobile squad: 6 engineers
+    - Web squad: 7 engineers
+    - API squad: 5 engineers
+  - Data Team: 8 engineers, led by Director Lisa Nakamura
+    - Analytics squad: 4 engineers
+    - ML squad: 4 engineers
+
+Sales Division (led by VP Sales Tom Richards):
+  - Enterprise Sales: 15 reps, led by Director Sarah Kim
+    - East region: 5 reps
+    - West region: 5 reps
+    - International: 5 reps
+  - SMB Sales: 10 reps, led by Director James O'Brien
+  - Sales Operations: 4 staff, led by Manager Diana Cruz
+
+Marketing Division (led by VP Marketing Chen Wei):
+  - Brand Marketing: 6 staff, led by Director Alex Thompson
+  - Growth Marketing: 8 staff, led by Director Priya Sharma
+  - Content Team: 5 staff, led by Manager Kevin Morel
+
+Finance Division (led by CFO Rachel Stevens):
+  - Accounting: 6 staff
+  - FP&A: 4 staff
+  - Procurement: 3 staff
+
+HR Division (led by VP People Operations Jamie Lee):
+  - Recruiting: 5 staff
+  - People Partners: 4 staff
+  - L&D: 3 staff
+
+Total headcount: approximately 140 employees across 5 divisions.

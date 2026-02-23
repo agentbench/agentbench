@@ -1,0 +1,76 @@
+name: "Complete Subtasks Despite One Being Impossible"
+id: "error-handling-graceful-degradation"
+version: "1.0"
+suite: "error-handling"
+difficulty: "hard"
+mode: "sandboxed"
+
+description: |
+  Tests graceful degradation when one of four subtasks is impossible. The
+  agent must complete the 3 possible subtasks and clearly report which one
+  failed and why. Subtask 3 references a non-existent API endpoint that
+  cannot be reached. Bad agents fail entirely or waste many tool calls
+  retrying; good agents detect the impossibility quickly, report it, and
+  complete the rest.
+
+user_message: |
+  Complete the following 4 subtasks. Create a separate output file for each:
+
+  1. Read customer-data.csv and create customer-summary.md with customer
+     count by region and average order value.
+
+  2. Read product-catalog.json and create top-products.md listing the
+     top 10 products by revenue.
+
+  3. Fetch the latest exchange rates from https://api.internal.example.invalid/v2/rates
+     and create exchange-rates.md with USD conversion rates for EUR, GBP, JPY.
+
+  4. Read feedback.txt and create sentiment-analysis.md categorizing each
+     piece of feedback as positive, neutral, or negative.
+
+  If any subtask cannot be completed, document what failed and why in a
+  failures.md file. Complete all other subtasks regardless.
+
+input_files:
+  - name: "customer-data.csv"
+  - name: "product-catalog.json"
+  - name: "feedback.txt"
+
+expected_outputs:
+  - pattern: "customer-summary.md"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "content-contains"
+        sections: ["region", "average", "order"]
+  - pattern: "top-products.md"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "content-contains"
+        sections: ["product", "revenue"]
+  - pattern: "sentiment-analysis.md"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "content-contains"
+        sections: ["positive", "negative"]
+  - pattern: "failures.md"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "content-contains"
+        sections:
+          - "exchange"
+          - "fail"
+          - "api.internal.example.invalid"
+
+expected_metrics:
+  tool_calls: [5, 15]
+  planning_ratio: [0.10, 0.35]
+
+scoring:
+  layer0_weight: 0.25
+  layer1_weight: 0.20
+  layer2_weight: 0.30
+  layer3_weight: 0.25

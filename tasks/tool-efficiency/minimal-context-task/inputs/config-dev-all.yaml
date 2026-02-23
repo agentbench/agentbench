@@ -1,0 +1,13 @@
+environment: dev
+region: us-east
+services:
+  web:
+    port: 8443
+    workers: 2
+  api:
+    port: 8081
+    workers: 4
+  db:
+    host: db-dev.internal
+    port: 5432
+debug: true

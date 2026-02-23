@@ -1,0 +1,244 @@
+{
+  "products": [
+    {
+      "id": "PROD-001",
+      "name": "Product 1",
+      "category": "Hardware",
+      "price": 487.12,
+      "units_sold": 350,
+      "revenue": 170492.0
+    },
+    {
+      "id": "PROD-002",
+      "name": "Product 2",
+      "category": "Software",
+      "price": 316.51,
+      "units_sold": 549,
+      "revenue": 173763.99
+    },
+    {
+      "id": "PROD-003",
+      "name": "Product 3",
+      "category": "Electronics",
+      "price": 427.72,
+      "units_sold": 712,
+      "revenue": 304536.64
+    },
+    {
+      "id": "PROD-004",
+      "name": "Product 4",
+      "category": "Hardware",
+      "price": 76.4,
+      "units_sold": 984,
+      "revenue": 75177.6
+    },
+    {
+      "id": "PROD-005",
+      "name": "Product 5",
+      "category": "Electronics",
+      "price": 347.27,
+      "units_sold": 626,
+      "revenue": 217391.02
+    },
+    {
+      "id": "PROD-006",
+      "name": "Product 6",
+      "category": "Software",
+      "price": 226.47,
+      "units_sold": 341,
+      "revenue": 77226.27
+    },
+    {
+      "id": "PROD-007",
+      "name": "Product 7",
+      "category": "Hardware",
+      "price": 78.35,
+      "units_sold": 177,
+      "revenue": 13867.95
+    },
+    {
+      "id": "PROD-008",
+      "name": "Product 8",
+      "category": "Electronics",
+      "price": 237.57,
+      "units_sold": 892,
+      "revenue": 211912.44
+    },
+    {
+      "id": "PROD-009",
+      "name": "Product 9",
+      "category": "Services",
+      "price": 39.56,
+      "units_sold": 934,
+      "revenue": 36949.04
+    },
+    {
+      "id": "PROD-010",
+      "name": "Product 10",
+      "category": "Software",
+      "price": 227.17,
+      "units_sold": 213,
+      "revenue": 48387.21
+    },
+    {
+      "id": "PROD-011",
+      "name": "Product 11",
+      "category": "Software",
+      "price": 96.6,
+      "units_sold": 25,
+      "revenue": 2415.0
+    },
+    {
+      "id": "PROD-012",
+      "name": "Product 12",
+      "category": "Software",
+      "price": 488.18,
+      "units_sold": 673,
+      "revenue": 328545.14
+    },
+    {
+      "id": "PROD-013",
+      "name": "Product 13",
+      "category": "Hardware",
+      "price": 394.09,
+      "units_sold": 35,
+      "revenue": 13793.15
+    },
+    {
+      "id": "PROD-014",
+      "name": "Product 14",
+      "category": "Hardware",
+      "price": 355.63,
+      "units_sold": 534,
+      "revenue": 189906.42
+    },
+    {
+      "id": "PROD-015",
+      "name": "Product 15",
+      "category": "Hardware",
+      "price": 241.26,
+      "units_sold": 79,
+      "revenue": 19059.54
+    },
+    {
+      "id": "PROD-016",
+      "name": "Product 16",
+      "category": "Hardware",
+      "price": 81.98,
+      "units_sold": 23,
+      "revenue": 1885.54
+    },
+    {
+      "id": "PROD-017",
+      "name": "Product 17",
+      "category": "Software",
+      "price": 71.86,
+      "units_sold": 907,
+      "revenue": 65177.02
+    },
+    {
+      "id": "PROD-018",
+      "name": "Product 18",
+      "category": "Services",
+      "price": 361.78,
+      "units_sold": 672,
+      "revenue": 243116.16
+    },
+    {
+      "id": "PROD-019",
+      "name": "Product 19",
+      "category": "Electronics",
+      "price": 443.72,
+      "units_sold": 116,
+      "revenue": 51471.52
+    },
+    {
+      "id": "PROD-020",
+      "name": "Product 20",
+      "category": "Electronics",
+      "price": 198.7,
+      "units_sold": 355,
+      "revenue": 70538.5
+    },
+    {
+      "id": "PROD-021",
+      "name": "Product 21",
+      "category": "Software",
+      "price": 488.12,
+      "units_sold": 384,
+      "revenue": 187438.08
+    },
+    {
+      "id": "PROD-022",
+      "name": "Product 22",
+      "category": "Electronics",
+      "price": 430.1,
+      "units_sold": 732,
+      "revenue": 314833.2
+    },
+    {
+      "id": "PROD-023",
+      "name": "Product 23",
+      "category": "Services",
+      "price": 289.57,
+      "units_sold": 627,
+      "revenue": 181560.39
+    },
+    {
+      "id": "PROD-024",
+      "name": "Product 24",
+      "category": "Hardware",
+      "price": 87.52,
+      "units_sold": 329,
+      "revenue": 28794.08
+    },
+    {
+      "id": "PROD-025",
+      "name": "Product 25",
+      "category": "Hardware",
+      "price": 264.5,
+      "units_sold": 594,
+      "revenue": 157113.0
+    },
+    {
+      "id": "PROD-026",
+      "name": "Product 26",
+      "category": "Services",
+      "price": 212.08,
+      "units_sold": 55,
+      "revenue": 11664.4
+    },
+    {
+      "id": "PROD-027",
+      "name": "Product 27",
+      "category": "Services",
+      "price": 480.43,
+      "units_sold": 828,
+      "revenue": 397796.04
+    },
+    {
+      "id": "PROD-028",
+      "name": "Product 28",
+      "category": "Software",
+      "price": 464.1,
+      "units_sold": 851,
+      "revenue": 394949.1
+    },
+    {
+      "id": "PROD-029",
+      "name": "Product 29",
+      "category": "Services",
+      "price": 26.88,
+      "units_sold": 339,
+      "revenue": 9112.32
+    },
+    {
+      "id": "PROD-030",
+      "name": "Product 30",
+      "category": "Software",
+      "price": 262.0,
+      "units_sold": 722,
+      "revenue": 189164.0
+    }
+  ]
+}

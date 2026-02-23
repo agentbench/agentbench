@@ -1,0 +1,15 @@
+region: us-west
+location: Oregon
+timezone: PST
+service: api
+environment: production
+server:
+  port: 8080
+  workers: 16
+  rate_limit: 5000
+auth:
+  provider: oauth2
+  token_ttl: 3600
+logging:
+  level: info
+  format: json

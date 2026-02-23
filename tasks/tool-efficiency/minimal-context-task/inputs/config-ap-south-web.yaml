@@ -1,0 +1,14 @@
+region: ap-south
+location: Mumbai
+timezone: IST
+service: web
+environment: production
+server:
+  port: 443
+  workers: 8
+  max_connections: 10000
+cdn:
+  enabled: true
+  provider: cloudfront
+ssl:
+  cert_path: /etc/ssl/ap-south.pem

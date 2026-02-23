@@ -1,0 +1,69 @@
+name: "Synthesize Relevant Information from Noisy Sources"
+id: "research-noise-filtering"
+version: "1.0"
+suite: "research"
+difficulty: "hard"
+mode: "sandboxed"
+
+description: |
+  Tests the agent's ability to identify relevant sources from a set of 8
+  input files where only 3 are relevant to the task. The other 5 contain
+  plausible but irrelevant information. The validator checks that the output
+  does NOT contain key terms from the irrelevant files, ensuring the agent
+  filtered correctly rather than dumping everything.
+
+user_message: |
+  You have 8 research files in the inputs directory. Your task is to write
+  a synthesis report on "Cloud Migration Strategies for Financial Services."
+  
+  Read all files and determine which ones are relevant to this specific topic.
+  Create migration-synthesis.md that:
+  1. Identifies which sources were relevant and which were not (with reasons)
+  2. Synthesizes ONLY the relevant information
+  3. Does NOT include information from irrelevant sources
+  4. Provides actionable recommendations based on the relevant sources
+
+  Be selective — including irrelevant information will lower your score.
+
+input_files:
+  - name: "source-01-cloud-finance.md"
+  - name: "source-02-retail-analytics.md"
+  - name: "source-03-migration-patterns.md"
+  - name: "source-04-gaming-infrastructure.md"
+  - name: "source-05-compliance-cloud.md"
+  - name: "source-06-social-media-scaling.md"
+  - name: "source-07-iot-edge-computing.md"
+  - name: "source-08-healthcare-data.md"
+
+expected_outputs:
+  - pattern: "migration-synthesis.md"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "content-contains"
+        sections:
+          - "relevant"
+          - "migration"
+          - "financial"
+          - "compliance"
+          - "recommendation"
+      - type: "content-not-contains"
+        sections:
+          - "Fortnite"
+          - "TikTok"
+          - "retail footfall"
+          - "smart thermostat"
+          - "patient portal"
+      - type: "word-count-range"
+        min: 400
+        max: 1500
+
+expected_metrics:
+  tool_calls: [9, 18]
+  planning_ratio: [0.10, 0.35]
+
+scoring:
+  layer0_weight: 0.25
+  layer1_weight: 0.20
+  layer2_weight: 0.25
+  layer3_weight: 0.30

@@ -1,0 +1,90 @@
+name: "Execute 6-Step Dependency Chain"
+id: "multi-step-dependency-chain"
+version: "1.0"
+suite: "multi-step"
+difficulty: "expert"
+mode: "real"
+
+description: |
+  Tests sequential multi-step execution where each step depends on the output
+  of the previous one. Step 3 intentionally produces ambiguous output (a data
+  file with entries that could be categorized two different ways). Good agents
+  document the ambiguity and pick a consistent interpretation for steps 4-6.
+  The setup script creates a realistic project structure with git history.
+
+user_message: |
+  This repository contains a data processing project. Execute the 6-step
+  pipeline described in PIPELINE.md. Each step depends on the output of the
+  previous step:
+
+  1. Parse raw-data.txt into structured JSON (parsed-data.json)
+  2. Validate the parsed data against schema.json (validation-report.md)
+  3. Categorize validated entries by type (categorized-data.json)
+  4. Generate statistics per category (category-stats.md)
+  5. Create visualizable summary data (summary.csv)
+  6. Write final analysis report (final-report.md)
+
+  Important: If any step produces ambiguous results, document your
+  interpretation in an assumptions.md file and proceed consistently.
+
+input_files: []
+
+expected_outputs:
+  - pattern: "parsed-data.json"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "command-output-contains"
+        command: "python3 -c \"import json; d=json.load(open('parsed-data.json')); print(f'ENTRIES:{len(d)}' if isinstance(d, list) else 'ENTRIES:'+str(len(d.get('entries',d.get('data',[])))))\""
+        contains: ["ENTRIES:"]
+  - pattern: "validation-report.md"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "content-contains"
+        sections: ["valid", "invalid", "schema"]
+  - pattern: "categorized-data.json"
+    required: true
+    validators:
+      - type: "file-exists"
+  - pattern: "category-stats.md"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "content-contains"
+        sections: ["category", "count", "total"]
+  - pattern: "summary.csv"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "command-output-contains"
+        command: "python3 -c \"import csv; r=list(csv.reader(open('summary.csv'))); print('CSV_VALID' if len(r)>=3 else 'INVALID')\""
+        contains: ["CSV_VALID"]
+  - pattern: "final-report.md"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "content-contains"
+        sections:
+          - "analysis"
+          - "finding"
+          - "recommendation"
+      - type: "word-count-range"
+        min: 300
+        max: 1500
+  - pattern: "assumptions.md"
+    required: false
+    validators:
+      - type: "file-exists"
+      - type: "content-contains"
+        sections: ["ambig"]
+
+expected_metrics:
+  tool_calls: [10, 30]
+  planning_ratio: [0.10, 0.35]
+
+scoring:
+  layer0_weight: 0.20
+  layer1_weight: 0.20
+  layer2_weight: 0.30
+  layer3_weight: 0.30

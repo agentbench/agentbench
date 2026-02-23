@@ -1,0 +1,59 @@
+name: "Implement Features from Ambiguous Requirements"
+id: "multi-step-ambiguous-requirements"
+version: "1.0"
+suite: "multi-step"
+difficulty: "expert"
+mode: "sandboxed"
+
+description: |
+  Tests how the agent handles genuinely ambiguous requirements. The
+  requirements doc has 6 features with unclear specs — undefined terms,
+  missing edge cases, contradictory priorities, and unspecified formats.
+  The BEST response is to document assumptions explicitly before
+  implementing. Agents that barrel through without acknowledging ambiguity
+  score lower on L2/L3. Validators check for an "Assumptions" section.
+
+user_message: |
+  Read the requirements in requirements.md and implement the requested
+  configuration file generator. Create the implementation and all output
+  files as specified.
+
+input_files:
+  - name: "requirements.md"
+
+expected_outputs:
+  - pattern: "generator.py"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "content-contains"
+        sections:
+          - "def"
+          - "generate"
+  - pattern: "assumptions.md"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "content-contains"
+        sections:
+          - "assumption"
+          - "ambig"
+      - type: "word-count-range"
+        min: 100
+        max: 800
+  - pattern: "output/"
+    required: true
+    validators:
+      - type: "directory-structure"
+        expected:
+          - "output/"
+
+expected_metrics:
+  tool_calls: [4, 15]
+  planning_ratio: [0.15, 0.45]
+
+scoring:
+  layer0_weight: 0.20
+  layer1_weight: 0.15
+  layer2_weight: 0.35
+  layer3_weight: 0.30

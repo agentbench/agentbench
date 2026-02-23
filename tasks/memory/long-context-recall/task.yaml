@@ -1,0 +1,133 @@
+name: "Recall Facts After Extended Distraction"
+id: "memory-long-context-recall"
+version: "1.0"
+suite: "memory"
+difficulty: "expert"
+mode: "sandboxed"
+type: "multi-turn"
+
+description: |
+  Tests long-context recall across 5 turns. Turn 1 provides 20 specific facts
+  (names, numbers, dates, codes). Turns 2-3 are unrelated distraction tasks
+  that consume context window. Turn 4 asks the agent to recall 15 of the 20
+  facts. Turn 5 asks for a structured summary using those facts. Agents with
+  memory systems or good context management will excel; vanilla agents will
+  lose facts as context fills with distraction content.
+
+input_files:
+  - name: "distraction-data-1.csv"
+  - name: "distraction-data-2.txt"
+
+turns:
+  - role: user
+    message: |
+      I'm going to give you 20 important facts for a project. Remember ALL of them — I'll ask about them later.
+
+      1. Project codename: AURORA-7
+      2. Lead architect: Dr. Yuki Tanaka
+      3. Budget approved: $2,847,000
+      4. Kickoff date: March 3, 2025
+      5. Server count: 47 nodes across 3 regions
+      6. Primary database: CockroachDB v23.1
+      7. API rate limit: 12,000 requests/minute
+      8. SLA target: 99.97% uptime
+      9. Security clearance level: TIER-3-RESTRICTED
+      10. CI/CD pipeline ID: PLN-8842-WEST
+      11. Monitoring tool: Datadog with custom dashboard ID DD-4419
+      12. Load balancer: HAProxy 2.8 with sticky sessions
+      13. Cache layer: Redis Cluster, 6 nodes, 384GB total
+      14. Backup schedule: Every 6 hours, 90-day retention
+      15. Compliance framework: SOC 2 Type II + HIPAA
+      16. Sprint cadence: 2 weeks, starting Tuesdays
+      17. QA lead: Marcus Chen-Ramirez
+      18. Max response time P99: 340ms
+      19. Feature flag system: LaunchDarkly, project key LD-AURORA
+      20. Disaster recovery RTO: 4 hours, RPO: 15 minutes
+    expect: "acknowledgment"
+
+  - role: user
+    message: |
+      Unrelated task: Analyze distraction-data-1.csv. It contains 200 rows of
+      sensor readings. Calculate the average, median, and standard deviation for
+      each sensor column. Create sensor-analysis.md with your findings. Include
+      any anomalous readings you detect.
+    expect: "file-output"
+    validators:
+      - type: "file-exists"
+        pattern: "sensor-analysis.md"
+      - type: "content-contains"
+        sections: ["average", "median", "standard deviation"]
+
+  - role: user
+    message: |
+      Another unrelated task: Read distraction-data-2.txt. It contains a fictional
+      company's org chart description. Create org-chart.md that reorganizes this
+      into a clean hierarchical structure with reporting lines. Include headcount
+      per department.
+    expect: "file-output"
+    validators:
+      - type: "file-exists"
+        pattern: "org-chart.md"
+      - type: "content-contains"
+        sections: ["department", "report"]
+
+  - role: user
+    message: |
+      Now recall the 20 project facts I gave you in the first message.
+      List at least 15 of them with their exact values (numbers, names, dates, codes).
+      Write them in project-facts.md.
+    expect: "file-output"
+    validators:
+      - type: "file-exists"
+        pattern: "project-facts.md"
+      - type: "content-contains"
+        sections:
+          - "AURORA-7"
+          - "Tanaka"
+          - "2,847,000"
+          - "99.97"
+          - "TIER-3"
+          - "PLN-8842"
+          - "Datadog"
+          - "Redis"
+          - "SOC 2"
+          - "Marcus"
+          - "340ms"
+          - "LaunchDarkly"
+          - "CockroachDB"
+          - "HAProxy"
+          - "March 3"
+
+  - role: user
+    message: |
+      Using the facts you recalled, create a one-page project-brief.md that
+      synthesizes them into a coherent project summary document. It should
+      include sections for: Infrastructure Overview, Security & Compliance,
+      Team & Process, and Performance Targets. Reference specific values
+      from the original 20 facts.
+    expect: "file-output"
+    validators:
+      - type: "file-exists"
+        pattern: "project-brief.md"
+      - type: "content-contains"
+        sections:
+          - "Infrastructure"
+          - "Security"
+          - "Compliance"
+          - "Performance"
+          - "AURORA"
+          - "99.97"
+          - "SOC 2"
+      - type: "word-count-range"
+        min: 300
+        max: 1200
+
+expected_metrics:
+  tool_calls: [8, 25]
+  planning_ratio: [0.05, 0.30]
+
+scoring:
+  layer0_weight: 0.35
+  layer1_weight: 0.10
+  layer2_weight: 0.20
+  layer3_weight: 0.35

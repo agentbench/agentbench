@@ -1,0 +1,14 @@
+region: us-east
+location: N. Virginia
+timezone: EST
+service: web
+environment: production
+server:
+  port: 443
+  workers: 8
+  max_connections: 10000
+cdn:
+  enabled: true
+  provider: cloudfront
+ssl:
+  cert_path: /etc/ssl/us-east.pem

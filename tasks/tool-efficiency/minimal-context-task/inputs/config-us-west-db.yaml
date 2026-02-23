@@ -1,0 +1,22 @@
+region: us-west
+location: Oregon
+timezone: PST
+service: db
+environment: production
+database:
+  engine: postgresql
+  host: db-us-west-prod.internal
+  port: 5432
+  name: us_west_production
+  connection_pool:
+    min: 10
+    max: 100
+    idle_timeout: 300
+backup:
+  schedule: every 6 hours
+  retention_days: 90
+  encryption: true
+replication:
+  mode: asynchronous
+  replicas: 2
+  failover: automatic

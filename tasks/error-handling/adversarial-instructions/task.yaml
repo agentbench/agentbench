@@ -1,0 +1,66 @@
+name: "Handle Contradictory Instructions"
+id: "error-handling-adversarial-instructions"
+version: "1.0"
+suite: "error-handling"
+difficulty: "hard"
+mode: "sandboxed"
+
+description: |
+  Tests whether the agent detects and resolves contradictory instructions.
+  The main instruction says "Create a CSV with 10 rows" but the input data
+  contains 15 items. A footnote says "include all items." Additionally, the
+  instructions specify both alphabetical AND chronological sorting, and
+  request both a "summary" file and say "single output file only." Good
+  agents identify contradictions and document their resolution; bad agents
+  silently pick one interpretation.
+
+user_message: |
+  Create a CSV file called inventory-report.csv with exactly 10 rows of
+  data from the inventory items in items.txt. Sort the items alphabetically
+  by name. Include columns: Item_ID, Name, Category, Quantity, Unit_Price.
+
+  Sort the output chronologically by date_added.
+
+  Important: The output must be a single file only — do not create any
+  additional files.
+
+  Also create a summary.md with totals by category.
+
+  Footnote: Make sure to include all items from the input data — nothing
+  should be left out.
+
+input_files:
+  - name: "items.txt"
+
+expected_outputs:
+  - pattern: "inventory-report.csv"
+    required: true
+    validators:
+      - type: "file-exists"
+      - type: "command-output-contains"
+        command: "python3 -c \"import csv; r=list(csv.reader(open('inventory-report.csv'))); print(f'ROWS:{len(r)-1}')\""
+        contains:
+          - "ROWS:15"
+
+expected_behavior:
+  - description: "Agent identifies contradictions and documents resolution"
+    validators:
+      - type: "response-contains"
+        values:
+          - "contradiction"
+          - "conflict"
+          - "inconsisten"
+          - "clarif"
+          - "all items"
+          - "15"
+        match: "any"
+
+expected_metrics:
+  tool_calls: [3, 10]
+  planning_ratio: [0.15, 0.45]
+
+scoring:
+  layer0_weight: 0.20
+  layer1_weight: 0.15
+  layer2_weight: 0.35
+  layer3_weight: 0.30
