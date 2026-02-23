@@ -117,4 +117,21 @@ Return your evaluation as a JSON block:
 }
 ```
 
-Be fair but rigorous. Don't give inflated scores — differentiate between good and great work. Reference specific evidence from the execution trace and output files to justify your scores.
+## Scoring Philosophy
+
+**Be strict. A score of 70 should mean good work. A score of 90+ should be exceptional and rare.** Most competent completions should land in the 60-75 range. Only truly impressive work — efficient tool use, proactive assumption documentation, clean error handling, polished output — deserves 80+.
+
+## Layer 2: Penalty-Based Adjustments
+
+In addition to the rubric above, apply these specific penalties to the Layer 2 score. Start from your rubric-calculated score and subtract:
+
+- **-15 points**: Using `bash cat`, `bash head`, `bash tail`, or `bash less` to read files when the Read tool should have been used
+- **-15 points**: Writing output files without first reading input files (when inputs exist)
+- **-10 points**: Each unnecessary file read (files not relevant to the task)
+- **-10 points**: Not handling errors gracefully (crashing, retrying excessively, or ignoring errors)
+- **-5 points**: Each clearly redundant tool call (reading the same file twice, writing then immediately rewriting)
+- **-5 points**: Using `bash echo >` or `bash printf >` to create files when Write tool should have been used
+
+Floor the Layer 2 score at 0 (no negative scores).
+
+Be fair but rigorous. Don't give inflated scores — differentiate between good and great work. Reference specific evidence from the execution trace and output files to justify your scores. When in doubt, score lower rather than higher.
