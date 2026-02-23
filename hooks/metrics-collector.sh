@@ -35,11 +35,11 @@ if [[ -z "$event_name" ]]; then
   exit 0
 fi
 
-# Timestamp in milliseconds — date +%s%3N works on GNU/BusyBox/Git-Bash;
-# fall back to Python if that produces a literal "%3N" (macOS stock date).
-timestamp_ms="$(date +%s%3N 2>/dev/null)" || timestamp_ms=""
-if [[ -z "$timestamp_ms" || "$timestamp_ms" == *"%3N"* ]]; then
-  timestamp_ms="$(python3 -c 'import time; print(int(time.time()*1000))' 2>/dev/null || echo "0")"
+# Timestamp in milliseconds — try python3 first (works everywhere),
+# fall back to date +%s with 000 appended (second precision).
+timestamp_ms="$(python3 -c 'import time; print(int(time.time()*1000))' 2>/dev/null)" || timestamp_ms=""
+if [[ -z "$timestamp_ms" || ! "$timestamp_ms" =~ ^[0-9]+$ ]]; then
+  timestamp_ms="$(date +%s)000"
 fi
 
 # Fall back run-id: prefer env var, then session_id, then "unknown"
