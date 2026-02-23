@@ -75,10 +75,11 @@ For each task:
 
 3. **Spawn task-runner subagent** with:
    - The task's `user_message`
-   - The workspace path
+   - The **absolute path** to the workspace directory (resolve it first with `cd .agentbench-tmp/{task-id} && pwd`)
    - The list of input files available in the workspace
    - The mode (sandboxed/real)
    - Do NOT pass expected_outputs, validators, or scoring info to the task-runner
+   - **CRITICAL**: Tell the task-runner the exact absolute workspace path. ALL files must be created inside that path. Example: "Your workspace is /Users/tarek/myproject/.agentbench-tmp/summarize-doc — create all files there."
 
 3b. **Compute metrics summary** after task-runner completes:
    - Check `.agentbench-tmp/metrics/` for `events.jsonl`

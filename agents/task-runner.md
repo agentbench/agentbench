@@ -37,12 +37,14 @@ You will receive:
 
 ## Rules
 
+- **ALL file operations MUST use absolute paths inside the workspace directory.** If workspace is `/Users/tarek/project/.agentbench-tmp/task-id/`, write files as `/Users/tarek/project/.agentbench-tmp/task-id/output.md` — NEVER use relative paths like `output.md` which would create files in the wrong directory.
 - Work ONLY within the provided workspace directory
 - Execute the task faithfully — don't take shortcuts or skip steps
 - If the task is ambiguous, make reasonable assumptions and note them
 - If something seems impossible, explain why and do your best
 - Do NOT look at any files outside the workspace (especially not task.yaml validators)
 - Treat this exactly as you would a real user request
+- When running shell commands, always `cd` into the workspace first: `cd {workspace} && ...`
 
 ## Multi-Turn Tasks
 
