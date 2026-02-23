@@ -1,6 +1,6 @@
 # AgentBench
 
-Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 60 tasks spanning easy to expert difficulty, with real-mode tasks that create realistic git repo workspaces. **100% of your score comes from fully automated, deterministic checks** — zero subjectivity, zero LLM judgment in scoring.
+Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 60 tasks spanning easy to expert difficulty, with real-mode tasks that create realistic git repo workspaces. **All scoring is rule-based** — no LLM judges, no subjective grading.
 
 ## Install
 
@@ -53,7 +53,7 @@ Each task is scored 0-100 across 3 layers:
 - **Layer 1 (40%)** — Metrics: tool call count, planning time, errors
 - **Layer 2 (20%)** — Behavioral analysis: tool appropriateness, read-before-write patterns, efficiency, error recovery (rule-based from JSONL event log)
 
-**100% automated** — zero subjectivity. Every point comes from deterministic, reproducible checks.
+**All rule-based** — no LLM judges. Scores may vary ±3-5 points between runs due to non-deterministic agent execution; we recommend averaging 3 runs.
 
 ## Not SWE-bench
 
@@ -64,7 +64,7 @@ AgentBench is a different kind of benchmark. Here's how it compares:
 | **Tests** | Code bug fixes | General agent ability (files, research, data, workflows) |
 | **Measures** | The model | Your setup + config + prompts |
 | **Tasks** | Pull request patches | Real-world work across 7 domains |
-| **Scoring** | Pass/fail | 3-layer 0-100 (100% automated, deterministic) |
+| **Scoring** | Pass/fail | 3-layer 0-100 (rule-based, no LLM judges) |
 | **Who varies** | The model changes, setup is fixed | The setup changes, model can be fixed |
 | **Key insight** | "Which model is smartest?" | "How good is your agent configuration?" |
 
