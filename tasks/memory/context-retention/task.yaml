@@ -60,4 +60,4 @@ scoring:
   layer0_weight: 0.3
   layer1_weight: 0.15
   layer2_weight: 0.2
-  layer3_weight: 0.35
+  layer3_weight: 0.10

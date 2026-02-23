@@ -1,0 +1,90 @@
+diff --git a/src/auth.py b/src/auth.py
+index 1234567..abcdefg 100644
+--- a/src/auth.py
++++ b/src/auth.py
+@@ -15,8 +15,12 @@ class AuthService:
+     def authenticate(self, username, password):
+-        user = self.db.query("SELECT * FROM users WHERE username = ?", (username,))
++        # BUG 1: SQL injection vulnerability - string formatting instead of parameterized query
++        user = self.db.query(f"SELECT * FROM users WHERE username = '{username}'")
+         if user and self.verify_password(password, user.password_hash):
+             return self.create_token(user)
+         return None
+ 
++    def delete_user(self, user_id):
++        # BUG 2: No authorization check - any authenticated user can delete any user
++        self.db.execute("DELETE FROM users WHERE id = ?", (user_id,))
++        return {"status": "deleted"}
++
+diff --git a/src/api.py b/src/api.py
+index 2345678..bcdefgh 100644
+--- a/src/api.py
++++ b/src/api.py
+@@ -22,6 +22,15 @@ def get_users():
+     users = db.query("SELECT * FROM users")
+     return jsonify([u.to_dict() for u in users])
+ 
++@app.route("/api/export")
++def export_data():
++    format = request.args.get("format", "json")
++    data = db.query("SELECT * FROM sensitive_records")
++    # SECURITY: No authentication required for sensitive data export
++    if format == "csv":
++        return generate_csv(data)
++    return jsonify([d.to_dict() for d in data])
++
+ @app.route("/api/users/<int:user_id>")
+ def get_user(user_id):
+     user = db.query("SELECT * FROM users WHERE id = ?", (user_id,))
+@@ -30,3 +39,8 @@ def get_user(user_id):
+         return jsonify(user.to_dict())
+     return jsonify({"error": "not found"}), 404
+ 
++@app.route("/api/process", methods=["POST"])
++def process_data():
++    data = request.get_json()
++    # BUG 3: No input validation - data could be None, missing keys, wrong types
++    result = expensive_computation(data["values"], data["iterations"])
++    return jsonify({"result": result})
+diff --git a/src/utils.py b/src/utils.py
+index 3456789..cdefghi 100644
+--- a/src/utils.py
++++ b/src/utils.py
+@@ -5,8 +5,8 @@ import os
+ def load_config(path):
+     """Load configuration from a YAML file."""
+-    with open(path, 'r') as f:
+-        return yaml.safe_load(f)
++    with open(path, 'r') as f:
++        return yaml.load(f, Loader=yaml.FullLoader)
+ 
+ def format_currency(amount):
+     """Format a number as currency."""
+@@ -15,3 +15,10 @@ def format_currency(amount):
+ def generate_id():
+     """Generate a unique identifier."""
+     return str(uuid.uuid4())
++
++def run_command(cmd):
++    """Run a shell command and return output."""
++    # Style: Using os.popen instead of subprocess
++    return os.popen(cmd).read()
++
++tempfile = "/tmp/app_" + str(os.getpid())  # Style: module-level side effect
+diff --git a/tests/test_api.py b/tests/test_api.py
+index 4567890..defghij 100644
+--- a/tests/test_api.py
++++ b/tests/test_api.py
+@@ -10,6 +10,12 @@ class TestAPI:
+         response = client.get("/api/users")
+         assert response.status_code == 200
+ 
++    def test_export(self, client):
++        response = client.get("/api/export")
++        assert response.status_code == 200
++        # Missing: no test for authentication requirement
++        # Missing: no test for CSV format option
++
+     def test_get_user(self, client):
+         response = client.get("/api/users/1")
+         assert response.status_code == 200

@@ -1,0 +1,71 @@
+name: Code Review - Security and Bugs
+id: research-code-review
+version: '1.0'
+suite: research
+difficulty: hard
+mode: sandboxed
+description: |
+  Tests the agent's ability to review a PR diff and identify specific bugs
+  and security issues. The diff contains 3 planted bugs and 2 security
+  vulnerabilities that are objectively identifiable. Validated by checking
+  if the review mentions each specific issue.
+user_message: |
+  Review the PR diff in changes.diff. This PR has 8 changes across 4 files
+  (src/auth.py, src/api.py, src/utils.py, tests/test_api.py).
+
+  Write review.md containing:
+  1. A summary of the changes
+  2. All bugs found (with file and line references)
+  3. All security concerns (with severity ratings)
+  4. Style issues
+  5. Recommendations
+
+  Be thorough — there are several serious issues in this PR.
+input_files:
+- name: changes.diff
+expected_outputs:
+- pattern: review.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - SQL injection
+    - authorization
+    - authentication
+    - validation
+    - input
+  - type: command-output-contains
+    command: >
+      python3 -c "
+      content = open('review.md').read().lower()
+      found = 0
+      # Bug 1: SQL injection in auth.py
+      if 'sql injection' in content or ('sql' in content and 'inject' in content) or 'f-string' in content or 'string format' in content:
+          found += 1
+      # Bug 2: No auth check on delete_user
+      if ('authorization' in content or 'permission' in content) and ('delete' in content):
+          found += 1
+      # Bug 3: No input validation in process_data
+      if ('validation' in content or 'validate' in content or 'none' in content) and ('process' in content or 'input' in content):
+          found += 1
+      # Security 1: Unauthenticated export endpoint
+      if ('export' in content) and ('auth' in content or 'unauthenticated' in content or 'sensitive' in content):
+          found += 1
+      # Security 2: os.popen usage
+      if 'popen' in content or 'subprocess' in content or 'command injection' in content or 'os.popen' in content:
+          found += 1
+      print(f'ISSUES_FOUND:{found}/5')
+      if found >= 4:
+          print('REVIEW_PASS')
+      "
+    contains:
+    - REVIEW_PASS
+expected_metrics:
+  tool_calls: [3, 8]
+  planning_ratio: [0.10, 0.30]
+scoring:
+  layer0_weight: 0.35
+  layer1_weight: 0.35
+  layer2_weight: 0.20
+  layer3_weight: 0.10

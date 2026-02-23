@@ -1,0 +1,56 @@
+app:
+  name: "MyService"
+  version: "3.2.1"
+  debug: false
+  log_level: "info"
+  max_retries: 5
+  timeout_seconds: 30
+  enable_cache: true
+  cache_ttl: 3600
+  workers: 4
+  bind_address: "0.0.0.0"
+  port: 8080
+
+database:
+  host: "db.internal.example.com"
+  port: 5432
+  name: "production_db"
+  user: "app_user"
+  password: "s3cur3_p@ss!"
+  pool_size: 20
+  max_overflow: 10
+  ssl_mode: "verify-full"
+  connection_timeout: 10
+  idle_timeout: 300
+
+redis:
+  host: "redis.internal.example.com"
+  port: 6379
+  db: 0
+  password: "r3d1s_p@ss"
+  max_connections: 50
+  socket_timeout: 5
+
+logging:
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  file: "/var/log/myservice/app.log"
+  max_size_mb: 100
+  backup_count: 5
+  console_output: true
+
+features:
+  enable_notifications: true
+  enable_analytics: false
+  enable_rate_limiting: true
+  rate_limit_per_minute: 120
+  maintenance_mode: false
+  allowed_origins:
+    - "https://app.example.com"
+    - "https://admin.example.com"
+    - "https://api.example.com"
+
+monitoring:
+  enabled: true
+  endpoint: "/metrics"
+  interval_seconds: 15
+  health_check_path: "/health"

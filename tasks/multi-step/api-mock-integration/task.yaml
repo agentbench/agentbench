@@ -1,0 +1,66 @@
+name: API Integration and Data Aggregation
+id: multi-step-api-mock-integration
+version: '1.0'
+suite: multi-step
+difficulty: expert
+mode: sandboxed
+description: |
+  Tests the agent's ability to interact with a REST API, aggregate data
+  from multiple endpoints, and produce a structured report. The mock API
+  serves deterministic JSON data, making validation fully objective.
+user_message: |
+  A REST API is running at http://localhost:9876. Start by querying
+  /api/endpoints to discover available endpoints.
+
+  Tasks:
+  1. Query all available endpoints and collect the data
+  2. Create report.md with:
+     - Total number of active users
+     - List of active projects with their owners (match user IDs to names)
+     - Total budget across active projects
+     - The total_revenue from the metrics endpoint
+     - Summary statistics
+input_files: []
+expected_outputs:
+- pattern: report.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - active
+    - project
+    - budget
+    - revenue
+    - "847500"
+    - Alpha
+    - Gamma
+    - Alice
+  - type: command-output-contains
+    command: >
+      python3 -c "
+      content = open('report.md').read()
+      checks = 0
+      # Check total revenue mentioned
+      if '847500' in content or '847,500' in content: checks += 1
+      # Check active projects budget (50000+75000=125000)
+      if '125000' in content or '125,000' in content: checks += 1
+      # Check active user count (4 active)
+      if any(x in content for x in ['4 active', 'four active', '4 users']): checks += 1
+      # Check project-owner mapping
+      if 'Alice' in content and ('Alpha' in content or 'Gamma' in content): checks += 1
+      if checks >= 3:
+          print('REPORT_PASS')
+      else:
+          print(f'REPORT_FAIL: {checks}/4 checks passed')
+      "
+    contains:
+    - REPORT_PASS
+expected_metrics:
+  tool_calls: [5, 15]
+  planning_ratio: [0.10, 0.30]
+scoring:
+  layer0_weight: 0.35
+  layer1_weight: 0.35
+  layer2_weight: 0.20
+  layer3_weight: 0.10

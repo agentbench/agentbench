@@ -130,4 +130,4 @@ scoring:
   layer0_weight: 0.35
   layer1_weight: 0.10
   layer2_weight: 0.20
-  layer3_weight: 0.35
+  layer3_weight: 0.10

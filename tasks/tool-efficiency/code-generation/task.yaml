@@ -1,0 +1,83 @@
+name: Fibonacci with Tests
+id: tool-efficiency-code-generation
+version: '1.0'
+suite: tool-efficiency
+difficulty: hard
+mode: sandboxed
+description: |
+  Tests the agent's ability to write production-quality code with proper
+  error handling and tests. Validated by running a hidden test suite
+  against the agent's implementation — fully deterministic.
+user_message: |
+  Write a Python module fibonacci.py that implements:
+  - fibonacci(n): returns the nth Fibonacci number (0-indexed: fib(0)=0, fib(1)=1, fib(2)=1, ...)
+  - fibonacci_sequence(n): returns a list of the first n Fibonacci numbers
+  - Handle edge cases: negative input (raise ValueError), zero, large numbers (n=100+)
+  - Include proper docstrings and type hints
+
+  Also write test_fibonacci.py with comprehensive unit tests for your implementation.
+input_files: []
+expected_outputs:
+- pattern: fibonacci.py
+  required: true
+  validators:
+  - type: file-exists
+  - type: command-output-contains
+    command: "python3 -c \"import ast; ast.parse(open('fibonacci.py').read()); print('SYNTAX_OK')\""
+    contains:
+    - SYNTAX_OK
+  - type: command-output-contains
+    command: >
+      python3 -c "
+      import importlib.util, sys
+      spec = importlib.util.spec_from_file_location('fibonacci', 'fibonacci.py')
+      mod = importlib.util.module_from_spec(spec)
+      spec.loader.exec_module(mod)
+      errors = []
+      # Test basic values
+      if mod.fibonacci(0) != 0: errors.append('fib(0) wrong')
+      if mod.fibonacci(1) != 1: errors.append('fib(1) wrong')
+      if mod.fibonacci(10) != 55: errors.append('fib(10) wrong')
+      if mod.fibonacci(20) != 6765: errors.append('fib(20) wrong')
+      # Test sequence
+      seq = mod.fibonacci_sequence(7)
+      if seq != [0, 1, 1, 2, 3, 5, 8]: errors.append(f'sequence(7) wrong: {seq}')
+      # Test edge cases
+      try:
+          mod.fibonacci(-1)
+          errors.append('negative input should raise ValueError')
+      except ValueError:
+          pass
+      # Test large number
+      try:
+          r = mod.fibonacci(100)
+          if r != 354224848179261915075: errors.append(f'fib(100) wrong: {r}')
+      except Exception as e:
+          errors.append(f'fib(100) failed: {e}')
+      # Test sequence(0)
+      s0 = mod.fibonacci_sequence(0)
+      if s0 != []: errors.append(f'sequence(0) wrong: {s0}')
+
+      if not errors:
+          print('FIBONACCI_PASS')
+      else:
+          print(f'ERRORS: {errors}')
+      "
+    contains:
+    - FIBONACCI_PASS
+- pattern: test_fibonacci.py
+  required: true
+  validators:
+  - type: file-exists
+  - type: command-output-contains
+    command: "python3 -m pytest test_fibonacci.py -v 2>&1 | tail -3"
+    contains:
+    - passed
+expected_metrics:
+  tool_calls: [3, 10]
+  planning_ratio: [0.10, 0.30]
+scoring:
+  layer0_weight: 0.35
+  layer1_weight: 0.35
+  layer2_weight: 0.20
+  layer3_weight: 0.10

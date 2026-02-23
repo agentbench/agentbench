@@ -121,6 +121,8 @@ Return your evaluation as a JSON block:
 
 **Be strict. A score of 70 should mean good work. A score of 90+ should be exceptional and rare.** Most competent completions should land in the 60-75 range. Only truly impressive work — efficient tool use, proactive assumption documentation, clean error handling, polished output — deserves 80+.
 
+**L3 is a tiebreaker, not a differentiator.** Most of the scoring happens through objective L0 and L1 validators (70% of the total weight). Your L2 scoring should focus on measurable behavioral patterns from the tool call log, not subjective impressions. Only use LLM judgment for aspects that genuinely cannot be measured objectively. L3 (Output Quality) carries only 10% weight — keep evaluations brief and evidence-based.
+
 ## Layer 2: Penalty-Based Adjustments
 
 In addition to the rubric above, apply these specific penalties to the Layer 2 score. Start from your rubric-calculated score and subtract:

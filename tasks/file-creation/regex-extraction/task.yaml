@@ -1,0 +1,86 @@
+name: Log File Data Extraction
+id: file-creation-regex-extraction
+version: '1.0'
+suite: file-creation
+difficulty: hard
+mode: sandboxed
+description: |
+  Tests the agent's ability to parse multiple log file formats and extract
+  structured data using pattern matching. Five log files with different
+  formats must be parsed to extract IPs, timestamps, and error codes.
+  Validated deterministically by checking the output JSON.
+user_message: |
+  You have 5 log files in different formats: nginx.log, syslog.log, app.log,
+  auth.log, and access.log.
+
+  Extract the following from ALL log files combined and save as extracted.json:
+  {
+    "unique_ips": [...],           // All unique IP addresses found
+    "errors": [                    // All error entries
+      {"source": "filename", "timestamp": "...", "code": "...", "message": "..."}
+    ],
+    "failed_logins": [             // Failed login attempts
+      {"timestamp": "...", "ip": "...", "user": "..."}
+    ],
+    "summary": {
+      "total_unique_ips": N,
+      "total_errors": N,
+      "total_failed_logins": N
+    }
+  }
+input_files:
+- name: nginx.log
+- name: syslog.log
+- name: app.log
+- name: auth.log
+- name: access.log
+expected_outputs:
+- pattern: extracted.json
+  required: true
+  validators:
+  - type: file-exists
+  - type: command-output-contains
+    command: >
+      python3 -c "
+      import json
+      with open('extracted.json') as f:
+          data = json.load(f)
+      errors = []
+      # Check structure
+      for key in ['unique_ips', 'errors', 'failed_logins', 'summary']:
+          if key not in data:
+              errors.append(f'missing key: {key}')
+      if errors:
+          print(f'STRUCTURE_FAIL: {errors}')
+      else:
+          ips = set(data['unique_ips'])
+          # Known IPs that must be found
+          required_ips = {'192.168.1.100', '10.0.0.55', '172.16.0.22', '198.51.100.23', '203.0.113.50', '45.33.32.156', '10.0.0.99'}
+          missing_ips = required_ips - ips
+          if len(missing_ips) > 1:
+              errors.append(f'missing IPs: {missing_ips}')
+          # Check error count (nginx 500s + syslog ERRORs + app ERRORs = 2+3+5=10)
+          if len(data['errors']) < 7:
+              errors.append(f'too few errors: {len(data[\"errors\"])}')
+          # Check failed logins (3 failed: test, root, admin from various IPs)
+          if len(data['failed_logins']) < 2:
+              errors.append(f'too few failed_logins: {len(data[\"failed_logins\"])}')
+          # Check summary exists and is reasonable
+          s = data.get('summary', {})
+          if s.get('total_unique_ips', 0) < 10:
+              errors.append(f'unique IP count too low: {s.get(\"total_unique_ips\")}')
+          if not errors:
+              print('EXTRACTION_PASS')
+          else:
+              print(f'ERRORS: {errors}')
+      "
+    contains:
+    - EXTRACTION_PASS
+expected_metrics:
+  tool_calls: [5, 15]
+  planning_ratio: [0.10, 0.30]
+scoring:
+  layer0_weight: 0.35
+  layer1_weight: 0.35
+  layer2_weight: 0.20
+  layer3_weight: 0.10

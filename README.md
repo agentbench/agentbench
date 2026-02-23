@@ -1,6 +1,6 @@
 # AgentBench
 
-Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 50 tasks spanning easy to expert difficulty, with real-mode tasks that create realistic git repo workspaces.
+Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 60 tasks spanning easy to expert difficulty, with real-mode tasks that create realistic git repo workspaces. **70% of your score comes from fully automated, deterministic validators** — no LLM self-grading inflation.
 
 ## Install
 
@@ -12,7 +12,7 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 ## Quick Start
 
 ```
-/benchmark                              # Run all 50 tasks (full profile)
+/benchmark                              # Run all 60 tasks (full profile)
 /benchmark --fast                       # Run 19 easy+medium tasks (fast profile)
 /benchmark --suite research             # Run one domain
 /benchmark --suite research --fast      # Run easy+medium tasks in one domain
@@ -35,13 +35,13 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 
 | Domain | Tasks | Difficulty | What It Tests |
 |--------|-------|------------|---------------|
-| File Creation | 10 | 1E, 3M, 5H, 1X | Documents, spreadsheets, project scaffolding, config migration, skill graphs, strict format compliance |
-| Research | 6 | 2H, 3M, 1H | Summarize, compare, multi-source synthesis, git archaeology, noise filtering |
-| Data Analysis | 6 | 1E, 1M, 2H, 2X | Anomalies, statistics, multi-format reconciliation, log pattern detection, hidden patterns |
-| Multi-Step | 7 | 1H, 2H, 2X, 2X | Data pipelines, log analysis, repo refactoring, release preparation, dependency chains, ambiguous requirements |
+| File Creation | 12 | 1E, 3M, 6H, 2X | Documents, spreadsheets, project scaffolding, config migration, skill graphs, strict format compliance, regex extraction |
+| Research | 7 | 2H, 3M, 2H | Summarize, compare, multi-source synthesis, git archaeology, noise filtering, code review |
+| Data Analysis | 8 | 1E, 1M, 4H, 2X | Anomalies, statistics, SQL queries, data pipelines, multi-format reconciliation, log pattern detection, hidden patterns |
+| Multi-Step | 10 | 1H, 4H, 3X, 2X | Data pipelines, log analysis, repo refactoring, release preparation, dependency chains, ambiguous requirements, git workflow, API integration, refactoring |
 | Memory | 6 | 2M, 1H, 2X | Recall, constraints, context switching, progressive accumulation, long-context recall |
-| Error Handling | 8 | 1E, 2H, 4H, 1X | Corrupted input, cascading failures, misleading errors, partial recovery, adversarial instructions, graceful degradation |
-| Tool Efficiency | 7 | 3E, 4H | Minimal reads, right tool choice, codebase navigation, targeted fixes, environment awareness, minimal context |
+| Error Handling | 9 | 1E, 2H, 4H, 2X | Corrupted input, cascading failures, misleading errors, partial recovery, adversarial instructions, graceful degradation, code debugging |
+| Tool Efficiency | 8 | 3E, 5H | Minimal reads, right tool choice, codebase navigation, targeted fixes, environment awareness, minimal context, code generation |
 
 *E=Easy, M=Medium, H=Hard, X=Expert*
 
@@ -49,10 +49,12 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 
 Each task is scored 0-100 across 4 layers:
 
-- **Layer 0 (20%)** — Automated checks: files exist, format valid, content matches
+- **Layer 0 (35%)** — Automated structural checks: files exist, format valid, content matches, command-output validators
 - **Layer 1 (35%)** — Metrics: tool call count, planning time, errors
-- **Layer 2 (20%)** — Behavioral: instruction adherence, tool choice, approach quality
-- **Layer 3 (25%)** — Output quality: completeness, accuracy, formatting, polish
+- **Layer 2 (20%)** — Behavioral: instruction adherence, tool choice, approach quality (penalty-based)
+- **Layer 3 (10%)** — Output quality: completeness, accuracy, formatting (tiebreaker only)
+
+**70% objective** (L0+L1) — fully automated, deterministic validators with no LLM judgment.
 
 ## Not SWE-bench
 
@@ -91,7 +93,7 @@ Each run produces three files in `agentbench-results/{run-id}/`:
 
 ## Profiles
 
-- **Full** (default) — All 50 tasks across all difficulty levels
+- **Full** (default) — All 60 tasks across all difficulty levels
 - **Fast** (`--fast`) — 19 easy+medium tasks for quick feedback, covers all 7 domains (unchanged from v1)
 
 Results track the profile used, and `/benchmark-compare` warns when comparing runs with different profiles.

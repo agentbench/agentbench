@@ -1,0 +1,86 @@
+name: YAML to TOML Config Migration
+id: file-creation-config-migration
+version: '1.0'
+suite: file-creation
+difficulty: hard
+mode: sandboxed
+description: |
+  Tests the agent's ability to accurately migrate a complex YAML configuration
+  file to TOML format, preserving all 35+ settings including nested structures,
+  arrays, and various data types. Validated deterministically by parsing
+  both files and comparing values.
+user_message: |
+  Migrate the configuration in legacy-config.yaml to TOML format. Save
+  the result as config.toml.
+
+  Requirements:
+  - Preserve ALL values exactly (strings, numbers, booleans, arrays)
+  - Use proper TOML sections for nested structures
+  - Add type annotation comments above each value (e.g., # type: string)
+  - Maintain logical grouping
+input_files:
+- name: legacy-config.yaml
+expected_outputs:
+- pattern: config.toml
+  required: true
+  validators:
+  - type: file-exists
+  - type: command-output-contains
+    command: >
+      python3 -c "
+      import sys
+      try:
+          import tomllib
+      except ImportError:
+          import tomli as tomllib
+      import yaml
+
+      with open('legacy-config.yaml') as f:
+          y = yaml.safe_load(f)
+      with open('config.toml', 'rb') as f:
+          t = tomllib.load(f)
+
+      errors = []
+      def check(ydict, tdict, path=''):
+          for k, v in ydict.items():
+              tp = f'{path}.{k}' if path else k
+              if isinstance(v, dict):
+                  if k not in tdict:
+                      errors.append(f'missing section: {tp}')
+                  else:
+                      check(v, tdict[k], tp)
+              elif isinstance(v, list):
+                  if k not in tdict:
+                      errors.append(f'missing key: {tp}')
+                  elif sorted(str(x) for x in v) != sorted(str(x) for x in tdict[k]):
+                      errors.append(f'list mismatch: {tp}')
+              else:
+                  if k not in tdict:
+                      errors.append(f'missing key: {tp}')
+                  elif str(v) != str(tdict[k]) and type(v) != type(tdict.get(k)):
+                      errors.append(f'value mismatch: {tp}: {v} != {tdict.get(k)}')
+
+      check(y, t)
+      # Check type comments exist
+      with open('config.toml') as f:
+          content = f.read()
+      type_comments = content.count('# type:')
+      if type_comments < 20:
+          errors.append(f'only {type_comments} type annotations (need 20+)')
+
+      if len(errors) <= 2:
+          print('MIGRATION_PASS')
+      else:
+          print(f'ERRORS: {errors[:5]}')
+      print(f'KEYS_CHECKED:{len([k for d in [y] for k in d])}')
+      "
+    contains:
+    - MIGRATION_PASS
+expected_metrics:
+  tool_calls: [3, 10]
+  planning_ratio: [0.10, 0.30]
+scoring:
+  layer0_weight: 0.35
+  layer1_weight: 0.35
+  layer2_weight: 0.20
+  layer3_weight: 0.10

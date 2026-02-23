@@ -107,7 +107,7 @@ For each task:
    ```
    score = (L0 * layer0_weight) + (L1 * layer1_weight) + (L2 * layer2_weight) + (L3 * layer3_weight)
    ```
-   Use weights from task.yaml scoring section, or defaults: L0=0.20, L1=0.35, L2=0.20, L3=0.25
+   Use weights from task.yaml scoring section, or defaults: L0=0.35, L1=0.35, L2=0.20, L3=0.10
 
 8. **Save task result** to `agentbench-results/{run-id}/{task-id}/`:
    - `scores.json`: All layer scores, composite score, evaluator notes, breakdown

@@ -1,0 +1,50 @@
+name: Debug Python Project
+id: error-handling-code-debug
+version: '1.0'
+suite: error-handling
+difficulty: expert
+mode: sandboxed
+description: |
+  Tests the agent's ability to find and fix bugs in a Python project with
+  5 source files. There are 3 bugs: a syntax error, a logic error, and
+  a missing edge case. The test suite must pass after fixes — fully
+  deterministic validation via pytest.
+user_message: |
+  This Python project has bugs. The test suite in tests/test_all.py has
+  3 tests that should all pass, but currently they fail.
+
+  Find and fix all the bugs. Do NOT modify the test file — only fix the
+  source code in src/.
+
+  Run the tests to verify your fixes work.
+input_files: []
+expected_outputs:
+- pattern: test-results
+  required: true
+  validators:
+  - type: command-output-contains
+    command: "cd $PWD && python3 -m pytest tests/ -v 2>&1 | tail -5"
+    contains:
+    - "3 passed"
+- pattern: src/formatter.py
+  required: true
+  validators:
+  - type: command-output-contains
+    command: "python3 -c \"import ast; ast.parse(open('src/formatter.py').read()); print('SYNTAX_OK')\""
+    contains:
+    - SYNTAX_OK
+- pattern: src/calculator.py
+  required: true
+  validators:
+  - type: command-output-contains
+    command: "python3 -c \"from src.calculator import divide, average; print('IMPORT_OK')\""
+    contains:
+    - IMPORT_OK
+expected_metrics:
+  tool_calls: [5, 18]
+  planning_ratio: [0.10, 0.30]
+scoring:
+  layer0_weight: 0.35
+  layer1_weight: 0.35
+  layer2_weight: 0.20
+  layer3_weight: 0.10

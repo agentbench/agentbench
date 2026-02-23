@@ -1,0 +1,74 @@
+name: Git Workflow Management
+id: multi-step-git-workflow
+version: '1.0'
+suite: multi-step
+difficulty: hard
+mode: sandboxed
+description: |
+  Tests the agent's ability to manage a complex git workflow: resolving
+  merge conflicts between branches, fixing a broken CI configuration,
+  creating a release branch, and writing a changelog. Validated through
+  git commands — fully deterministic.
+user_message: |
+  You have a git repo with 3 feature branches (feature-a, feature-b,
+  feature-c) and a broken CI config in .github/workflows/ci.yml.
+
+  Tasks:
+  1. Merge all 3 feature branches into main, resolving any conflicts
+     (keep both features where possible)
+  2. Fix the CI config to properly set up Python before running tests
+  3. Create a release branch called release/1.0.0 from the updated main
+  4. Write CHANGELOG.md documenting all changes from the merged branches
+input_files: []
+expected_outputs:
+- pattern: CHANGELOG.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - changelog
+    - multiply
+    - subtract
+    - greeting
+    - README
+- pattern: .github/workflows/ci.yml
+  required: true
+  validators:
+  - type: file-exists
+  - type: command-output-contains
+    command: "grep -c 'setup-python' .github/workflows/ci.yml && echo CI_FIX_FOUND || echo CI_NOT_FIXED"
+    contains:
+    - CI_FIX_FOUND
+- pattern: release-branch
+  required: true
+  validators:
+  - type: command-output-contains
+    command: "git branch --list 'release/*' | head -1 | grep -q 'release/' && echo RELEASE_BRANCH_EXISTS || echo NO_RELEASE_BRANCH"
+    contains:
+    - RELEASE_BRANCH_EXISTS
+- pattern: merged-branches
+  required: true
+  validators:
+  - type: command-output-contains
+    command: >
+      python3 -c "
+      import subprocess
+      log = subprocess.check_output(['git', 'log', '--oneline', '--all'], text=True)
+      has_multiply = 'multiply' in open('app.py').read() if __import__('os').path.exists('app.py') else False
+      has_subtract = 'subtract' in open('app.py').read() if __import__('os').path.exists('app.py') else False
+      if has_multiply and has_subtract:
+          print('MERGE_PASS')
+      else:
+          print(f'MERGE_FAIL: multiply={has_multiply} subtract={has_subtract}')
+      "
+    contains:
+    - MERGE_PASS
+expected_metrics:
+  tool_calls: [8, 25]
+  planning_ratio: [0.10, 0.30]
+scoring:
+  layer0_weight: 0.35
+  layer1_weight: 0.35
+  layer2_weight: 0.20
+  layer3_weight: 0.10

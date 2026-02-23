@@ -1,0 +1,63 @@
+name: Refactor with Test Preservation
+id: multi-step-refactor-preserve-tests
+version: '1.0'
+suite: multi-step
+difficulty: expert
+mode: sandboxed
+description: |
+  Tests the agent's ability to refactor messy but working code while
+  preserving all existing tests. The module has ~200 lines of working
+  code with 12 tests. Validated by running pytest and checking the
+  test file is unmodified.
+user_message: |
+  Refactor inventory.py for better readability and maintainability.
+  The code works but is messy — improve it.
+
+  Rules:
+  - DO NOT modify test_inventory.py
+  - All 12 tests must still pass after refactoring
+  - Keep the same public API (function names and signatures)
+  - Improve: variable names, reduce repetition, add docstrings,
+    use Python idioms, organize logically
+input_files: []
+expected_outputs:
+- pattern: inventory.py
+  required: true
+  validators:
+  - type: file-exists
+  - type: command-output-contains
+    command: "python3 -m pytest test_inventory.py -v 2>&1 | tail -5"
+    contains:
+    - "12 passed"
+- pattern: test_inventory.py
+  required: true
+  validators:
+  - type: file-unchanged
+- pattern: code-quality
+  required: true
+  validators:
+  - type: command-output-contains
+    command: >
+      python3 -c "
+      content = open('inventory.py').read()
+      lines = content.strip().split('\n')
+      has_docstrings = content.count('\"\"\"') >= 6
+      has_type_hints = ':' in content and '->' in content
+      # Check it's not just the same file
+      if len(lines) > 150:
+          print('NOT_SHORTER')
+      elif has_docstrings:
+          print('REFACTOR_PASS')
+      else:
+          print('NEEDS_MORE_REFACTORING')
+      "
+    contains:
+    - REFACTOR_PASS
+expected_metrics:
+  tool_calls: [5, 18]
+  planning_ratio: [0.10, 0.30]
+scoring:
+  layer0_weight: 0.35
+  layer1_weight: 0.35
+  layer2_weight: 0.20
+  layer3_weight: 0.10
