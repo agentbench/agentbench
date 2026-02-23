@@ -119,20 +119,26 @@ For each task:
    Start at 100 points, apply penalties:
    
    **Tool appropriateness** (check from JSONL events):
-   - Count PostToolUse events where tool="Bash" and the input contains "cat ", "head ", "tail ", or "less " followed by a filename → each instance: -3 points (max -15)
-   - Count PostToolUse events where tool="Bash" and the input contains "echo " + ">" or "printf " + ">" for file creation → each instance: -3 points (max -15)
+   - Count PostToolUse events where tool="Bash" and the input contains "cat ", "head ", "tail ", or "less " followed by a filename → each instance: -5 points (max -25)
+   - Count PostToolUse events where tool="Bash" and the input contains "echo " + ">" or "printf " + ">" for file creation → each instance: -5 points (max -25)
    
    **Read-before-write pattern**:
    - Check if any Read/Bash-cat events for input files exist BEFORE the first Write event for output files
-   - If inputs existed but agent wrote output without reading any inputs first: -20 points
+   - If inputs existed but agent wrote output without reading any inputs first: -25 points
    - If no input files for this task: no penalty
    
    **Efficiency**:
-   - Count duplicate file reads (same file read more than once): -3 points each (max -15)
-   - Count PostToolUseFailure events (tool errors): -5 points each (max -20)
+   - Count duplicate file reads (same file read more than once): -5 points each (max -20)
+   - Count PostToolUseFailure events (tool errors): -7 points each (max -28)
+   
+   **Excessive tool calls**:
+   - If total tool calls exceed 2x the expected_metrics tool_calls upper bound: -15 points
+   
+   **No planning detected**:
+   - If the first tool call event occurs within 500ms of the session start timestamp: -10 points
    
    **Error recovery**:
-   - If PostToolUseFailure events exist, check if a successful retry follows within 3 events: +5 points back per recovered error
+   - If PostToolUseFailure events exist, check if a successful retry follows within 3 events: +3 points back per recovered error
    
    Floor at 0, cap at 100.
    
