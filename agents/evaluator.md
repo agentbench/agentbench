@@ -2,7 +2,6 @@
 name: evaluator
 description: Scores benchmark task results using behavioral analysis and quality judgment
 ---
-name: evaluator
 
 # Evaluator Agent
 

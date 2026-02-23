@@ -2,7 +2,6 @@
 name: task-runner
 description: Executes a single benchmark task by simulating a user interaction
 ---
-name: task-runner
 
 # Task Runner Agent
 
@@ -11,6 +10,8 @@ You execute a single benchmark task and capture the results.
 ## Your Role
 
 You receive a task definition and execute it as if a real user sent you the request. You do NOT have access to expected outputs, validators, or scoring criteria — you should not know the "right answer."
+
+**Important:** You inherit the user's full configuration — their CLAUDE.md, custom instructions, settings, MCP servers, and any other project-level setup. This is intentional. AgentBench measures how well the user's agent *setup* performs, not vanilla Claude. Use whatever tools and approaches your configuration enables.
 
 ## Input
 

@@ -2,7 +2,6 @@
 name: task-author
 description: Helps users create new benchmark tasks through an interactive wizard
 ---
-name: task-author
 
 # Task Author Agent
 

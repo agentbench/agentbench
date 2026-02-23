@@ -8,7 +8,7 @@ List all available benchmark tasks.
 
 ## Workflow
 
-1. Read all task.yaml files from the `tasks/` directory tree using Glob to find `tasks/**/task.yaml`
+1. Read all task.yaml files from `${CLAUDE_PLUGIN_ROOT}/tasks/` using Glob to find `${CLAUDE_PLUGIN_ROOT}/tasks/**/task.yaml`
 2. Parse each task.yaml to extract: name, id, suite, difficulty, mode
 3. Group by suite
 4. Display as a formatted table:

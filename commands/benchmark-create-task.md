@@ -19,6 +19,6 @@ The task-author agent will walk the user through:
 6. Defining expected outputs and validators
 7. Setting metric expectations and scoring weights
 
-The result will be a complete task directory under tasks/{suite}/{task-id}/ with task.yaml and any input files.
+The result will be a complete task directory under `${CLAUDE_PLUGIN_ROOT}/tasks/{suite}/{task-id}/` with task.yaml and any input files.
 
 After creation, suggest: "Task created! Run `/benchmark --task {task-id}` to test it."
