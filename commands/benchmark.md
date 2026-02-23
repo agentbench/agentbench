@@ -21,9 +21,11 @@ Parse from $ARGUMENTS:
 
 ### Step 1: Discover Tasks
 
-Read task.yaml files from the plugin's `tasks/` directory structure:
+The plugin root is available as `${CLAUDE_PLUGIN_ROOT}`. All file paths below are relative to this root. Use `${CLAUDE_PLUGIN_ROOT}/tasks/` to find task files — do NOT search the filesystem.
+
+Read task.yaml files from:
 ```
-tasks/{suite-name}/{task-name}/task.yaml
+${CLAUDE_PLUGIN_ROOT}/tasks/{suite-name}/{task-name}/task.yaml
 ```
 
 Each task.yaml contains: name, id, suite, difficulty, mode, user_message, input_files, expected_outputs, expected_metrics, scoring weights.
@@ -34,7 +36,7 @@ Filter by --suite or --task if specified. If --fast is specified and --task is n
 
 Generate a run ID from the current timestamp: `YYYYMMDD-HHmmss`
 
-Read `suite_version` from `.claude-plugin/plugin.json`.
+Read `suite_version` from `${CLAUDE_PLUGIN_ROOT}/suite-version.json`.
 
 Create the results directory:
 ```
@@ -50,8 +52,8 @@ For each task:
 1. **Set up workspace**:
    - If mode is "sandboxed": create `/tmp/agentbench-task-{task-id}/` as workspace
    - If mode is "real": create `/tmp/agentbench-task-{task-id}/` as workspace (real-mode tasks still use isolated temp dirs, but allow full tool access)
-   - Copy input files from `tasks/{suite}/{task}/inputs/` to the workspace (if inputs/ exists)
-   - If the task directory contains a `setup.sh`: run `bash tasks/{suite}/{task}/setup.sh {workspace-path}` to scaffold the workspace. The setup script receives the workspace path as $1 and creates files, git repos, etc. inside it.
+   - Copy input files from `${CLAUDE_PLUGIN_ROOT}/tasks/{suite}/{task}/inputs/` to the workspace (if inputs/ exists)
+   - If the task directory contains a `setup.sh`: run `bash ${CLAUDE_PLUGIN_ROOT}/tasks/{suite}/{task}/setup.sh {workspace-path}` to scaffold the workspace. The setup script receives the workspace path as $1 and creates files, git repos, etc. inside it.
    - For validators that use `file-unchanged`: compute checksums of specified files now (after setup, before task-runner runs) and store them for comparison after scoring.
    - Set environment variable `AGENTBENCH_RUN_ID` to `{run-id}-{task-id}`
 
@@ -146,7 +148,7 @@ After all tasks complete:
 
 ### Step 6: Clean Up
 
-If the task directory contains a `teardown.sh`: run `bash tasks/{suite}/{task}/teardown.sh {workspace-path}` for any custom cleanup.
+If the task directory contains a `teardown.sh`: run `bash ${CLAUDE_PLUGIN_ROOT}/tasks/{suite}/{task}/teardown.sh {workspace-path}` for any custom cleanup.
 If --keep-workspace was NOT specified, remove temp workspace directories under /tmp/agentbench-task-*.
 Always keep the agentbench-results/ directory.
 
