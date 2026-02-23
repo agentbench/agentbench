@@ -1,6 +1,6 @@
 # AgentBench
 
-Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 60 tasks spanning easy to expert difficulty, with real-mode tasks that create realistic git repo workspaces. **All scoring is rule-based** — no LLM judges, no subjective grading.
+Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 68 tasks spanning easy to expert difficulty, with real-mode tasks that create realistic git repo workspaces. **All scoring is rule-based** — no LLM judges, no subjective grading.
 
 ## Install
 
@@ -12,7 +12,7 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 ## Quick Start
 
 ```
-/benchmark                              # Run all 60 tasks (full profile)
+/benchmark                              # Run all 68 tasks (full profile)
 /benchmark --fast                       # Run 19 easy+medium tasks (fast profile)
 /benchmark --suite research             # Run one domain
 /benchmark --suite research --fast      # Run easy+medium tasks in one domain
@@ -39,7 +39,7 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 | Research | 7 | 2H, 3M, 2H | Summarize, compare, multi-source synthesis, git archaeology, noise filtering, code review |
 | Data Analysis | 8 | 1E, 1M, 4H, 2X | Anomalies, statistics, SQL queries, data pipelines, multi-format reconciliation, log pattern detection, hidden patterns |
 | Multi-Step | 10 | 1H, 4H, 3X, 2X | Data pipelines, log analysis, repo refactoring, release preparation, dependency chains, ambiguous requirements, git workflow, API integration, refactoring |
-| Memory | 6 | 2M, 1H, 2X | Recall, constraints, context switching, progressive accumulation, long-context recall |
+| Memory | 14 | 2M, 5H, 7X | Recall, constraints, context switching, progressive accumulation, long-context recall, factual QA, cross-session handoff, temporal ordering, contradicting updates, selective recall, incremental context, noise filtering, numerical precision |
 | Error Handling | 9 | 1E, 2H, 4H, 2X | Corrupted input, cascading failures, misleading errors, partial recovery, adversarial instructions, graceful degradation, code debugging |
 | Tool Efficiency | 8 | 3E, 5H | Minimal reads, right tool choice, codebase navigation, targeted fixes, environment awareness, minimal context, code generation |
 
@@ -92,7 +92,7 @@ Each run produces three files in `agentbench-results/{run-id}/`:
 
 ## Profiles
 
-- **Full** (default) — All 60 tasks across all difficulty levels
+- **Full** (default) — All 68 tasks across all difficulty levels
 - **Fast** (`--fast`) — 19 easy+medium tasks for quick feedback, covers all 7 domains (unchanged from v1)
 
 Results track the profile used, and `/benchmark-compare` warns when comparing runs with different profiles.
