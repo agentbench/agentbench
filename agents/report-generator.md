@@ -14,6 +14,8 @@ You will receive:
 - **mode**: "sandboxed" or "real"
 - **profile**: "fast" or "full" — indicates which task subset was run
 - **suite_version**: Semver string (e.g. "1.0.0") — tracks the task corpus version
+- **model**: The model used for the benchmark run (e.g. "claude-sonnet-4-20250514")
+- **total_runtime**: Total wall-clock time for the run (formatted + raw seconds)
 - **tasks**: Array of task results, each containing:
   - task definition (name, id, suite, difficulty)
   - layer scores (L0, L1, L2) with breakdowns
@@ -34,6 +36,7 @@ Machine-readable results with this structure:
   "mode": "sandboxed",
   "profile": "full",
   "suite_version": "1.0.0",
+  "model": "claude-sonnet-4-20250514",
   "overall_score": 74,
   "duration_ms": 754000,
   "task_count": 24,
@@ -160,7 +163,7 @@ body {
 **Header** (centered):
 - "AgentBench" in mono, bold, 24px
 - Overall score as large number (48px, mono, bold, score-colored)
-- Below score: run_id, profile badge, suite version, mode — all in 10px mono muted
+- Below score: run_id, model name, profile badge, suite version, mode, total runtime — all in 10px mono muted
 - Profile badge: "FULL" or "FAST" with border
 
 **Metrics Panel** (immediately below header, grid of 6 cards):

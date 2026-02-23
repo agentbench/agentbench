@@ -56,7 +56,11 @@ Create the results directory:
 agentbench-results/{run-id}/
 ```
 
-Announce: `Starting AgentBench run {run-id} | Profile: {profile} | Suite version: {suite_version} | Tasks: {count}`
+Record the benchmark start time: `date -u +%Y-%m-%dT%H:%M:%SZ` and also `date +%s` (epoch seconds for duration calculation).
+
+Detect the model being used. Run: `echo $ANTHROPIC_MODEL` or check the Claude Code session info. If unavailable, note as "unknown".
+
+Announce: `Starting AgentBench run {run-id} | Profile: {profile} | Suite version: {suite_version} | Tasks: {count} | Model: {model}`
 
 ### Step 3: Execute Each Task
 
@@ -188,11 +192,14 @@ After all tasks complete:
 2. Compute domain averages (group tasks by suite, average composite scores)
 3. Compute overall score (average of domain scores — equal domain weighting)
 4. Compute aggregate metrics (total tool calls, total errors, avg planning ratio, total time)
-5. Spawn the report-generator subagent with:
+5. Calculate total runtime: `current epoch - start epoch` → format as Xm Xs
+6. Spawn the report-generator subagent with:
    - run_id
    - mode
    - profile ("fast" or "full")
    - suite_version
+   - model (the model name detected at start)
+   - total_runtime (formatted and raw seconds)
    - All task results (scores, metrics)
    - output_dir: agentbench-results/{run-id}/
 6. Report generator produces: report.md, report.html, results.json
