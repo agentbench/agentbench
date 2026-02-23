@@ -9,6 +9,5 @@
   "repository": "https://github.com/agentbench/agentbench",
   "license": "MIT",
   "keywords": ["benchmark", "testing", "agent", "evaluation", "metrics"],
-  "commands": "./commands/",
-  "hooks": "./hooks/hooks.json"
+  "commands": "./commands/"
 }
