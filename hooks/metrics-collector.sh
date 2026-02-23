@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 # AgentBench metrics collector hook
-# Receives hook event JSON on stdin, normalizes it, and appends to JSONL log.
+# Receives hook event JSON on stdin from Claude Code.
+# Appends normalized events to a JSONL log.
 # On Stop events, also computes the aggregate summary.
 
 set -euo pipefail
-
-# Resolve script directory so we can source the shared library
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/../lib/metrics.sh"
 
 # ---------------------------------------------------------------------------
 # Read JSON input from stdin
@@ -25,27 +22,36 @@ if [[ -z "$input" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Extract common fields
+# Determine metrics directory
+# Use CLAUDE_PROJECT_DIR (set by Claude Code) to write metrics alongside the project.
+# Fall back to cwd from the hook input, then actual cwd.
+# ---------------------------------------------------------------------------
+project_dir="${CLAUDE_PROJECT_DIR:-}"
+if [[ -z "$project_dir" ]]; then
+  project_dir="$(echo "$input" | jq -r '.cwd // empty')"
+fi
+if [[ -z "$project_dir" ]]; then
+  project_dir="$(pwd)"
+fi
+
+METRICS_DIR="${project_dir}/.agentbench-tmp/metrics"
+mkdir -p "$METRICS_DIR"
+
+# ---------------------------------------------------------------------------
+# Extract common fields from Claude Code hook input
 # ---------------------------------------------------------------------------
 event_name="$(echo "$input" | jq -r '.hook_event_name // empty')"
-session_id="$(echo "$input" | jq -r '.session_id // empty')"
 
 # If the event name is empty / unsupported, exit silently
 if [[ -z "$event_name" ]]; then
   exit 0
 fi
 
-# Timestamp in milliseconds — try python3 first (works everywhere),
-# fall back to date +%s with 000 appended (second precision).
+# Timestamp in milliseconds
 timestamp_ms="$(python3 -c 'import time; print(int(time.time()*1000))' 2>/dev/null)" || timestamp_ms=""
 if [[ -z "$timestamp_ms" || ! "$timestamp_ms" =~ ^[0-9]+$ ]]; then
   timestamp_ms="$(date +%s)000"
 fi
-
-# Fall back run-id: prefer env var, then session_id, then "unknown"
-export AGENTBENCH_RUN_ID="${AGENTBENCH_RUN_ID:-${session_id:-unknown}}"
-# Metrics directory: prefer env var, otherwise use .agentbench-tmp/metrics/ in cwd
-export AGENTBENCH_METRICS_DIR="${AGENTBENCH_METRICS_DIR:-.agentbench-tmp/metrics}"
 
 # ---------------------------------------------------------------------------
 # Build a normalized event JSON based on the hook event type
@@ -57,35 +63,33 @@ case "$event_name" in
     event_json=$(jq -nc \
       --arg event "$event_name" \
       --argjson ts "$timestamp_ms" \
-      --arg session "$session_id" \
-      '{event: $event, ts: $ts, session_id: $session}')
+      '{event: $event, ts: $ts}')
     ;;
 
   PreToolUse)
     tool_name="$(echo "$input" | jq -r '.tool_name // "unknown"')"
-    tool_use_id="$(echo "$input" | jq -r '.tool_use_id // ""')"
+    tool_input="$(echo "$input" | jq -c '.tool_input // {}' | head -c 500)"
     event_json=$(jq -nc \
       --arg event "$event_name" \
       --argjson ts "$timestamp_ms" \
       --arg tool "$tool_name" \
-      --arg tool_use_id "$tool_use_id" \
-      '{event: $event, ts: $ts, tool: $tool, tool_use_id: $tool_use_id}')
+      --arg input "$tool_input" \
+      '{event: $event, ts: $ts, tool: $tool, tool_input: $input}')
     ;;
 
   PostToolUse)
     tool_name="$(echo "$input" | jq -r '.tool_name // "unknown"')"
-    tool_use_id="$(echo "$input" | jq -r '.tool_use_id // ""')"
+    tool_input="$(echo "$input" | jq -c '.tool_input // {}' | head -c 500)"
     event_json=$(jq -nc \
       --arg event "$event_name" \
       --argjson ts "$timestamp_ms" \
       --arg tool "$tool_name" \
-      --arg tool_use_id "$tool_use_id" \
-      '{event: $event, ts: $ts, tool: $tool, tool_use_id: $tool_use_id}')
+      --arg input "$tool_input" \
+      '{event: $event, ts: $ts, tool: $tool, tool_input: $input}')
     ;;
 
   PostToolUseFailure)
     tool_name="$(echo "$input" | jq -r '.tool_name // "unknown"')"
-    # Truncate error message to 200 characters to keep log compact
     error_msg="$(echo "$input" | jq -r '.error // ""' | head -c 200)"
     event_json=$(jq -nc \
       --arg event "$event_name" \
@@ -102,8 +106,33 @@ case "$event_name" in
       '{event: $event, ts: $ts}')
 
     # Append the Stop event first, then compute the summary
-    append_event "$event_json"
-    compute_summary
+    echo "$event_json" >> "${METRICS_DIR}/events.jsonl"
+
+    # Compute summary inline (don't source metrics.sh — use direct jq)
+    if [[ -f "${METRICS_DIR}/events.jsonl" ]] && [[ -s "${METRICS_DIR}/events.jsonl" ]]; then
+      jq -s '
+        (map(select(.event == "UserPromptSubmit")) | first // null) as $start |
+        (map(select(.event == "Stop"))             | last  // null) as $stop  |
+        (map(select(.event == "PreToolUse"))       | first // null) as $first_tool |
+        (if $start and $stop then (($stop.ts // 0) - ($start.ts // 0)) else null end) as $total_ms |
+        (if $start and $first_tool then (($first_tool.ts // 0) - ($start.ts // 0)) else null end) as $planning_ms |
+        (if $planning_ms and $total_ms and $total_ms > 0 then (($planning_ms / $total_ms) * 1000 | round / 1000) else null end) as $planning_ratio |
+        [.[] | select(.event == "PostToolUse")] as $tool_calls |
+        ($tool_calls | length) as $tool_count |
+        ($tool_calls | group_by(.tool) | map({(.[0].tool // "unknown"): length}) | add // {}) as $by_type |
+        ([.[] | select(.event == "PostToolUseFailure")] | length) as $errors |
+        ([.[] | select(.event == "SubagentStart")] | length) as $subagents |
+        {
+          total_time_ms: $total_ms,
+          planning_time_ms: $planning_ms,
+          planning_ratio: $planning_ratio,
+          tool_calls_total: $tool_count,
+          tool_calls_by_type: $by_type,
+          errors: $errors,
+          subagents_spawned: $subagents
+        }
+      ' "${METRICS_DIR}/events.jsonl" > "${METRICS_DIR}/summary.json" 2>/dev/null || true
+    fi
     exit 0
     ;;
 
@@ -117,16 +146,13 @@ case "$event_name" in
     ;;
 
   PreCompact)
-    trigger="$(echo "$input" | jq -r '.trigger // "unknown"')"
     event_json=$(jq -nc \
       --arg event "$event_name" \
       --argjson ts "$timestamp_ms" \
-      --arg trigger "$trigger" \
-      '{event: $event, ts: $ts, trigger: $trigger}')
+      '{event: $event, ts: $ts}')
     ;;
 
   *)
-    # Unknown event — log it with minimal fields so nothing is lost
     event_json=$(jq -nc \
       --arg event "$event_name" \
       --argjson ts "$timestamp_ms" \
@@ -135,4 +161,4 @@ case "$event_name" in
 esac
 
 # Append the normalized event to the JSONL log
-append_event "$event_json"
+echo "$event_json" >> "${METRICS_DIR}/events.jsonl"

@@ -87,9 +87,10 @@ For each task:
    - **CRITICAL**: Tell the task-runner the exact absolute workspace path. ALL files must be created inside that path. Example: "Your workspace is /Users/tarek/myproject/.agentbench-tmp/summarize-doc — create all files there."
 
 3b. **Compute metrics summary** after task-runner completes:
-   - Check `.agentbench-tmp/metrics/` for `events.jsonl`
-   - If it exists, run: `bash ${CLAUDE_PLUGIN_ROOT}/lib/compute-summary.sh .agentbench-tmp/metrics/`
-   - If no events.jsonl found, metrics will be unavailable for this task
+   - Check `.agentbench-tmp/metrics/` for `events.jsonl` and `summary.json`
+   - The hooks write metrics to `$CLAUDE_PROJECT_DIR/.agentbench-tmp/metrics/` (or cwd). The Stop hook auto-computes summary.json.
+   - If `summary.json` exists, use it for L1. If `events.jsonl` exists, use it for L2.
+   - If neither exists, run: `ls -la .agentbench-tmp/metrics/ 2>/dev/null` to debug, then note metrics as unavailable (weights will redistribute to L0).
 
 4. **Layer 0 — Automated Structural Checks** (you compute this directly):
    After the task-runner completes, check the workspace:
@@ -117,7 +118,7 @@ For each task:
      - 1-2 errors: 15 points
      - 3+ errors: 0 points
    - Normalize to 0-100 scale
-   - If no metrics available (hooks didn't fire), score as 50 with a note
+   - If no metrics available (hooks didn't fire): redistribute L1 weight to L0. Set L1 score to null (excluded from composite). Recalculate composite as: `score = (L0 * 0.65) + (L2 * 0.35)` when L1 is unavailable, or `score = L0 * 1.0` when both L1 and L2 are unavailable. Log a note: "Metrics unavailable — weights redistributed to L0."
 
 6. **Layer 2 — Behavioral Analysis** (you compute this directly from the JSONL events log):
    Read events from `.agentbench-tmp/metrics/events.jsonl`
@@ -148,11 +149,21 @@ For each task:
    
    Floor at 0, cap at 100.
    
-   If no JSONL events available (hooks didn't fire), score as 50 with a note.
+   If no JSONL events available (hooks didn't fire): redistribute L2 weight to L0. Set L2 score to null (excluded from composite). See weight redistribution rules in L1 above.
 
 7. **Compute composite score**:
    ```
-   score = (L0 * layer0_weight) + (L1 * layer1_weight) + (L2 * layer2_weight)
+   # Normal (all layers available):
+   score = (L0 * 0.40) + (L1 * 0.40) + (L2 * 0.20)
+   
+   # If L1 unavailable (no metrics):
+   score = (L0 * 0.65) + (L2 * 0.35)
+   
+   # If L2 unavailable (no events):
+   score = (L0 * 0.55) + (L1 * 0.45)
+   
+   # If both L1 and L2 unavailable:
+   score = L0
    ```
    Use weights from task.yaml scoring section, or defaults: L0=0.40, L1=0.40, L2=0.20
 
