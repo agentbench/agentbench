@@ -1,10 +1,9 @@
-name: "Clean and Analyze Customer Feedback Data"
-id: "multi-step-data-pipeline"
-version: "1.0"
-suite: "multi-step"
-difficulty: "hard"
-mode: "sandboxed"
-
+name: Clean and Analyze Customer Feedback Data
+id: multi-step-data-pipeline
+version: '1.0'
+suite: multi-step
+difficulty: hard
+mode: sandboxed
 description: |
   Tests the agent's ability to execute a multi-step data processing pipeline.
   The dataset contains 80 rows of customer feedback with deliberate quality
@@ -12,7 +11,6 @@ description: |
   whitespace, empty feedback text fields, and special characters. Evaluates
   data cleaning, categorization, and analytical summarization across
   multiple output files.
-
 user_message: |
   Clean and analyze the customer feedback data in raw-feedback.csv:
   1) Remove duplicate rows (same Customer_ID and Date)
@@ -22,30 +20,36 @@ user_message: |
   4) Create cleaned-feedback.csv with the clean data plus a Sentiment column
   5) Create feedback-summary.md with category counts, average rating, and
      top 3 most common themes found in the feedback text
-
 input_files:
-  - name: "raw-feedback.csv"
-
+- name: raw-feedback.csv
 expected_outputs:
-  - pattern: "cleaned-feedback.csv"
-    required: true
-    validators:
-      - type: "file-exists"
-  - pattern: "feedback-summary.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "positive"
-          - "negative"
-          - "average"
-          - "theme"
-
+- pattern: cleaned-feedback.csv
+  required: true
+  validators:
+  - type: file-exists
+  - type: command-output-contains
+    command: 'python3 -c "import csv; r=csv.reader(open(''cleaned-feedback.csv'')); rows=list(r); header=rows[0];
+      print(''CSV_VALID'' if ''Sentiment'' in header and len(rows)>=70 else f''INVALID: {len(rows)} rows,
+      header={header}'')"'
+    contains:
+    - CSV_VALID
+- pattern: feedback-summary.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - positive
+    - negative
+    - average
+    - theme
+    - count
+    - rating
+    - sentiment
+    - category
 expected_metrics:
-  tool_calls: [4, 15]
-  planning_ratio: [0.1, 0.35]
-
+  tool_calls: [5, 14]
+  planning_ratio: [0.12, 0.32]
 scoring:
   layer0_weight: 0.15
   layer1_weight: 0.25

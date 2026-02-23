@@ -1,10 +1,9 @@
-name: "Detect Root Cause from Service Log Patterns"
-id: "data-analysis-log-pattern-detection"
-version: "1.0"
-suite: "data-analysis"
-difficulty: "expert"
-mode: "real"
-
+name: Detect Root Cause from Service Log Patterns
+id: data-analysis-log-pattern-detection
+version: '1.0'
+suite: data-analysis
+difficulty: expert
+mode: real
 description: |
   Tests the agent's ability to analyze five microservice log files alongside
   a service topology and SLA definitions to reconstruct a cascading failure
@@ -14,7 +13,6 @@ description: |
   (service-a). Two other services remain largely healthy. Evaluates temporal
   reasoning, cross-file correlation, root-cause analysis, and structured
   incident reporting.
-
 user_message: |
   This workspace contains logs from a 2-hour incident window (10:00-12:00)
   across 5 microservices, along with topology.yaml (service dependency graph)
@@ -27,30 +25,31 @@ user_message: |
   3. The cascade path showing how the failure propagated through services
   4. Specific SLA breaches with evidence (timestamps and values)
   5. Recommended fixes to prevent recurrence
-
 input_files: []
-
 expected_outputs:
-  - pattern: "incident-report.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "service-d"
-          - "root cause"
-          - "timeout"
-          - "retry"
-          - "cascade"
-          - "SLA"
-      - type: "word-count-range"
-        min: 500
-        max: 2500
-
+- pattern: incident-report.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - service-d
+    - root cause
+    - timeout
+    - retry
+    - cascade
+    - SLA
+    - timeline
+    - circuit breaker
+    - propagat
+    - service-a
+    - service-b
+  - type: word-count-range
+    min: 800
+    max: 2200
 expected_metrics:
-  tool_calls: [10, 25]
-  planning_ratio: [0.15, 0.40]
-
+  tool_calls: [12, 23]
+  planning_ratio: [0.17, 0.38]
 scoring:
   layer0_weight: 0.15
   layer1_weight: 0.25

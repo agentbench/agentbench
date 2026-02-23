@@ -1,17 +1,15 @@
-name: "Synthesize Conflicting Stakeholder Requirements"
-id: "research-multi-source-synthesis"
-version: "1.0"
-suite: "research"
-difficulty: "hard"
-mode: "real"
-
+name: Synthesize Conflicting Stakeholder Requirements
+id: research-multi-source-synthesis
+version: '1.0'
+suite: research
+difficulty: hard
+mode: real
 description: |
   Tests the agent's ability to read multiple documents with conflicting
   stakeholder perspectives and synthesize them into a coherent, prioritized
   requirements document. Evaluates cross-source analysis, conflict
   identification, critical reasoning about trade-offs, and the ability to
   produce actionable recommendations under real-world constraints.
-
 user_message: |
   Read all documents in this workspace (product-spec.md, cto-feedback.md,
   sales-feedback.md, compliance-feedback.md, and constraints.md). These
@@ -25,29 +23,29 @@ user_message: |
     resolution recommendation for each that considers the project constraints
   - Budget and timeline implications addressed throughout
   - A brief executive summary at the top
-
 input_files: []
-
 expected_outputs:
-  - pattern: "requirements.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "conflict"
-          - "priority"
-          - "must have"
-          - "budget"
-          - "timeline"
-      - type: "word-count-range"
-        min: 500
-        max: 2000
-
+- pattern: requirements.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - conflict
+    - priority
+    - must have
+    - budget
+    - timeline
+    - should have
+    - nice to have
+    - source
+    - trade-off
+  - type: word-count-range
+    min: 725
+    max: 1775
 expected_metrics:
-  tool_calls: [6, 15]
-  planning_ratio: [0.15, 0.40]
-
+  tool_calls: [7, 14]
+  planning_ratio: [0.17, 0.38]
 scoring:
   layer0_weight: 0.15
   layer1_weight: 0.25

@@ -1,10 +1,9 @@
-name: "Create Skill Graph with Cross-References"
-id: "file-creation-skill-graph-creation"
-version: "1.0"
-suite: "file-creation"
-difficulty: "medium"
-mode: "sandboxed"
-
+name: Create Skill Graph with Cross-References
+id: file-creation-skill-graph-creation
+version: '1.0'
+suite: file-creation
+difficulty: medium
+mode: sandboxed
 description: |
   Tests the agent's ability to create interconnected file structures with
   cross-references. Given a description of 6 related skills for a deployment
@@ -12,7 +11,6 @@ description: |
   and a graph.json manifest declaring nodes and edges. Evaluates understanding
   of dependency relationships, consistent cross-referencing, and valid graph
   structure.
-
 user_message: |
   Read skill-requirements.md in this directory. It describes 6 skills for a
   deployment pipeline domain, including their purposes and dependencies.
@@ -35,73 +33,73 @@ user_message: |
      - All node IDs must match the skill IDs used in the files
      - All edges must reference valid node IDs
      - No orphan nodes (every node must have at least one edge)
-
 input_files:
-  - "skill-requirements.md"
-
+- skill-requirements.md
 expected_outputs:
-  - pattern: "graph.json"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - '"nodes"'
-          - '"edges"'
-          - "provision-infrastructure"
-          - "configure-services"
-          - "deploy-application"
-          - "run-tests"
-          - "monitor-health"
-          - "rollback"
-  - pattern: "skills/"
-    required: true
-    validators:
-      - type: "directory-structure"
-        expected:
-          - "skills/provision-infrastructure.md"
-          - "skills/configure-services.md"
-          - "skills/deploy-application.md"
-          - "skills/run-tests.md"
-          - "skills/monitor-health.md"
-          - "skills/rollback.md"
-  - pattern: "skills/deploy-application.md"
-    required: true
-    validators:
-      - type: "content-contains"
-        sections:
-          - "configure-services"
-          - "run-tests"
-  - pattern: "skills/rollback.md"
-    required: true
-    validators:
-      - type: "content-contains"
-        sections:
-          - "monitor-health"
-          - "deploy-application"
-  - pattern: "skills/configure-services.md"
-    required: true
-    validators:
-      - type: "content-contains"
-        sections:
-          - "provision-infrastructure"
-  - pattern: "skills/*.md"
-    required: false
-    validators:
-      - type: "link-consistency"
-        files: "skills/*.md"
-  - pattern: "graph.json"
-    required: true
-    validators:
-      - type: "command-output-contains"
-        command: "python3 -c \"import json,sys; g=json.load(open('graph.json')); nodes={n['id'] for n in g['nodes']}; edges=g['edges']; valid=all(e['from'] in nodes and e['to'] in nodes for e in edges); connected={e['from'] for e in edges}|{e['to'] for e in edges}; orphans=nodes-connected; print('GRAPH_VALID' if valid and len(nodes)==6 and len(edges)>=5 and not orphans else f'INVALID: nodes={len(nodes)} edges={len(edges)} orphans={orphans}')\""
-        contains:
-          - "GRAPH_VALID"
-
+- pattern: graph.json
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - '"nodes"'
+    - '"edges"'
+    - provision-infrastructure
+    - configure-services
+    - deploy-application
+    - run-tests
+    - monitor-health
+    - rollback
+- pattern: skills/
+  required: true
+  validators:
+  - type: directory-structure
+    expected:
+    - skills/provision-infrastructure.md
+    - skills/configure-services.md
+    - skills/deploy-application.md
+    - skills/run-tests.md
+    - skills/monitor-health.md
+    - skills/rollback.md
+- pattern: skills/deploy-application.md
+  required: true
+  validators:
+  - type: content-contains
+    sections:
+    - configure-services
+    - run-tests
+- pattern: skills/rollback.md
+  required: true
+  validators:
+  - type: content-contains
+    sections:
+    - monitor-health
+    - deploy-application
+- pattern: skills/configure-services.md
+  required: true
+  validators:
+  - type: content-contains
+    sections:
+    - provision-infrastructure
+- pattern: skills/*.md
+  required: false
+  validators:
+  - type: link-consistency
+    files: skills/*.md
+- pattern: graph.json
+  required: true
+  validators:
+  - type: command-output-contains
+    command: 'python3 -c "import json,sys; g=json.load(open(''graph.json'')); nodes={n[''id''] for n in
+      g[''nodes'']}; edges=g[''edges'']; valid=all(e[''from''] in nodes and e[''to''] in nodes for e in
+      edges); connected={e[''from''] for e in edges}|{e[''to''] for e in edges}; orphans=nodes-connected;
+      print(''GRAPH_VALID'' if valid and len(nodes)==6 and len(edges)>=5 and not orphans else f''INVALID:
+      nodes={len(nodes)} edges={len(edges)} orphans={orphans}'')"'
+    contains:
+    - GRAPH_VALID
 expected_metrics:
-  tool_calls: [4, 14]
-  planning_ratio: [0.10, 0.35]
-
+  tool_calls: [5, 13]
+  planning_ratio: [0.12, 0.32]
 scoring:
   layer0_weight: 0.15
   layer1_weight: 0.25

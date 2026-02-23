@@ -1,10 +1,9 @@
-name: "Identify Contradictions in Impossible Request"
-id: "error-handling-impossible-request"
-version: "1.0"
-suite: "error-handling"
-difficulty: "medium"
-mode: "sandboxed"
-
+name: Identify Contradictions in Impossible Request
+id: error-handling-impossible-request
+version: '1.0'
+suite: error-handling
+difficulty: hard
+mode: sandboxed
 description: |
   Tests the agent's ability to identify contradictory or impossible
   requirements and respond constructively. The request contains multiple
@@ -12,32 +11,27 @@ description: |
   CSV and valid JSON simultaneously, and 50,000 rows with 25 columns
   cannot fit in 5KB. The agent should identify these issues and propose
   reasonable alternatives rather than attempting the impossible.
-
 user_message: |
   Create a single CSV file that contains both the raw data from our customer
   database (all 50,000 rows with 25 columns) AND a pivot table summary with
   charts. The file must be under 5KB. Also make sure it's both valid CSV and
   valid JSON at the same time.
-
 expected_outputs: []
-
 expected_behavior:
-  - description: "Agent identifies contradictions and proposes alternatives"
-    validators:
-      - type: "response-contains"
-        values:
-          - "contradiction"
-          - "impossible"
-          - "cannot"
-          - "not possible"
-          - "alternative"
-          - "instead"
-        match: "any"
-
+- description: Agent identifies contradictions and proposes alternatives
+  validators:
+  - type: response-contains
+    values:
+    - contradiction
+    - impossible
+    - cannot
+    - not possible
+    - alternative
+    - instead
+    match: any
 expected_metrics:
   tool_calls: [0, 4]
-  planning_ratio: [0.2, 0.8]
-
+  planning_ratio: [0.26, 0.74]
 scoring:
   layer0_weight: 0.15
   layer1_weight: 0.25

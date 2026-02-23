@@ -1,10 +1,9 @@
-name: "Reconcile Multi-Format Financial Data"
-id: "data-analysis-multi-format-reconciliation"
-version: "1.0"
-suite: "data-analysis"
-difficulty: "hard"
-mode: "real"
-
+name: Reconcile Multi-Format Financial Data
+id: data-analysis-multi-format-reconciliation
+version: '1.0'
+suite: data-analysis
+difficulty: hard
+mode: real
 description: |
   Tests the agent's ability to reconcile financial data across three different
   file formats (CSV, JSON, semi-structured text). The dataset contains 200
@@ -13,7 +12,6 @@ description: |
   near-miss reference IDs (typos), duplicate bank entries, and a split
   payment. Evaluates cross-format parsing, matching logic, anomaly
   detection, and structured reporting.
-
 user_message: |
   Reconcile the 3 financial data sources in this repository:
   - invoices.csv (200 invoices with Invoice_ID, Customer, Amount, Date, Reference_ID)
@@ -30,28 +28,28 @@ user_message: |
   6. Reference ID anomalies (near-miss or malformed reference IDs)
 
   Include specific IDs, amounts, and explanations for each finding.
-
 input_files: []
-
 expected_outputs:
-  - pattern: "reconciliation-report.md"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "unmatched"
-          - "discrepancy"
-          - "duplicate"
-          - "amount"
-      - type: "word-count-range"
-        min: 400
-        max: 2000
-
+- pattern: reconciliation-report.md
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - unmatched
+    - discrepancy
+    - duplicate
+    - amount
+    - orphan
+    - reference
+    - split
+    - matched
+  - type: word-count-range
+    min: 640
+    max: 1760
 expected_metrics:
-  tool_calls: [8, 20]
-  planning_ratio: [0.15, 0.40]
-
+  tool_calls: [9, 19]
+  planning_ratio: [0.17, 0.38]
 scoring:
   layer0_weight: 0.15
   layer1_weight: 0.25

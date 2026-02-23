@@ -1,10 +1,9 @@
-name: "Scaffold Linked Multi-Module Python Project"
-id: "file-creation-linked-project-scaffold"
-version: "1.0"
-suite: "file-creation"
-difficulty: "hard"
-mode: "sandboxed"
-
+name: Scaffold Linked Multi-Module Python Project
+id: file-creation-linked-project-scaffold
+version: '1.0'
+suite: file-creation
+difficulty: hard
+mode: sandboxed
 description: |
   Tests the agent's ability to scaffold a multi-module Python project where
   modules import from each other. Given an architecture document describing
@@ -12,7 +11,6 @@ description: |
   the agent must create a working package where cross-module imports actually
   resolve. Evaluates correct package structure, import wiring, and the ability
   to create interdependent code that functions as a unit.
-
 user_message: |
   Read architecture.md in this directory. It describes a Python project called
   TaskFlow with 4 modules that import from each other.
@@ -35,61 +33,57 @@ user_message: |
   pass bodies are fine, but all imports must resolve. Running
   `python -c "import taskflow.services; import taskflow.api; print('IMPORTS_OK')"`
   must succeed.
-
 input_files:
-  - "architecture.md"
-
+- architecture.md
 expected_outputs:
-  - pattern: "taskflow/__init__.py"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "__version__"
-  - pattern: "taskflow/models/__init__.py"
-    required: true
-    validators:
-      - type: "file-exists"
-  - pattern: "taskflow/utils/__init__.py"
-    required: true
-    validators:
-      - type: "file-exists"
-  - pattern: "taskflow/services/__init__.py"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "models"
-          - "utils"
-  - pattern: "taskflow/api/__init__.py"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "services"
-          - "models"
-  - pattern: "pyproject.toml"
-    required: true
-    validators:
-      - type: "file-exists"
-      - type: "content-contains"
-        sections:
-          - "taskflow"
-  - pattern: "taskflow/"
-    required: true
-    validators:
-      - type: "command-output-contains"
-        command: "cd $WORKSPACE && python3 -c \"import taskflow.services; import taskflow.api; print('IMPORTS_OK')\""
-        contains:
-          - "IMPORTS_OK"
-
+- pattern: taskflow/__init__.py
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - __version__
+- pattern: taskflow/models/__init__.py
+  required: true
+  validators:
+  - type: file-exists
+- pattern: taskflow/utils/__init__.py
+  required: true
+  validators:
+  - type: file-exists
+- pattern: taskflow/services/__init__.py
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - models
+    - utils
+- pattern: taskflow/api/__init__.py
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - services
+    - models
+- pattern: pyproject.toml
+  required: true
+  validators:
+  - type: file-exists
+  - type: content-contains
+    sections:
+    - taskflow
+- pattern: taskflow/
+  required: true
+  validators:
+  - type: command-output-contains
+    command: cd $WORKSPACE && python3 -c "import taskflow.services; import taskflow.api; print('IMPORTS_OK')"
+    contains:
+    - IMPORTS_OK
 expected_metrics:
-  tool_calls: [6, 20]
-  planning_ratio: [0.10, 0.35]
-
+  tool_calls: [8, 18]
+  planning_ratio: [0.12, 0.32]
 scoring:
   layer0_weight: 0.15
   layer1_weight: 0.25
