@@ -1,6 +1,6 @@
 # AgentBench
 
-Benchmark your Claude Code agent's general capabilities. Not a coding benchmark — tests real-world tasks like file creation, research, data analysis, multi-step workflows, memory, error handling, and tool efficiency. 62 tasks spanning medium to expert difficulty, with real-mode tasks that create realistic git repo workspaces. **All scoring is rule-based** — no LLM judges, no subjective grading.
+Benchmark your AI agent setup — not the model. 40 real-world tasks across 7 domains, scored with pure rule-based checks. No LLM judges.
 
 ## Install
 
@@ -12,13 +12,12 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 ## Quick Start
 
 ```
-/benchmark                              # Run all 62 tasks (full profile)
-/benchmark --fast                       # Run 8 medium tasks (fast profile)
-/benchmark --suite research             # Run one domain
-/benchmark --suite research --fast      # Run medium tasks in one domain
-/benchmark --task research-summarize-doc # Run one task
+/benchmark                              # Run all 40 tasks
+/benchmark --suite memory               # Run one domain
+/benchmark --task memory-factual-qa     # Run one task
 /benchmark --mode real                  # Test your real environment
-/benchmark --strict                     # Tag results with deterministic scoring method
+/benchmark --custom "Build a REST API"  # Benchmark a custom prompt
+/benchmark --strict                     # Tag as deterministic scoring
 ```
 
 ## Commands
@@ -26,100 +25,84 @@ Benchmark your Claude Code agent's general capabilities. Not a coding benchmark 
 | Command | Description |
 |---------|-------------|
 | `/benchmark` | Run benchmark tasks and produce a scored report |
+| `/benchmark --custom "<prompt>"` | Benchmark your setup on any custom prompt |
 | `/benchmark-list` | List all available tasks grouped by domain |
 | `/benchmark-results` | View results from previous runs |
-| `/benchmark-compare` | Compare two runs or skill vaults side-by-side |
+| `/benchmark-compare` | Compare two runs side-by-side |
 | `/benchmark-create-task` | Interactive wizard to create a new task |
 
-## Domains
+## Domains (40 tasks)
 
 | Domain | Tasks | Difficulty | What It Tests |
 |--------|-------|------------|---------------|
-| File Creation | 11 | 4M, 7H | Spreadsheets, project scaffolding, config migration, skill graphs, strict format compliance, regex extraction |
-| Research | 7 | 1M, 6H | Summarize, compare, multi-source synthesis, git archaeology, noise filtering, code review |
-| Data Analysis | 7 | 1M, 3H, 3X | Anomalies, SQL queries, data pipelines, multi-format reconciliation, log pattern detection, hidden patterns |
-| Multi-Step | 10 | 4H, 6X | Data pipelines, log analysis, repo refactoring, release preparation, dependency chains, ambiguous requirements, git workflow, API integration, refactoring |
-| Memory | 14 | 2M, 7H, 5X | Recall, constraints, context switching, progressive accumulation, long-context recall, factual QA, cross-session handoff, temporal ordering, contradicting updates, selective recall, incremental context, noise filtering, numerical precision |
-| Error Handling | 8 | 7H, 1X | Corrupted input, cascading failures, misleading errors, partial recovery, adversarial instructions, graceful degradation, code debugging |
-| Tool Efficiency | 5 | 5H | Codebase navigation, targeted fixes, environment awareness, minimal context, code generation |
+| Memory | 10 | 5H, 5X | Factual QA recall, cross-session handoff, temporal ordering, contradicting updates, selective recall, incremental context, noise vs signal, numerical precision |
+| Multi-Step | 9 | 4H, 5X | Data pipelines, log analysis, repo refactoring, release preparation, dependency chains, ambiguous requirements, git workflow, API integration |
+| Data Analysis | 6 | 3H, 3X | SQL queries, cross-referencing, multi-format reconciliation, data pipelines, log pattern detection, hidden patterns |
+| Error Handling | 4 | 3H, 1X | Corrupted input, adversarial instructions, graceful degradation, code debugging |
+| File Creation | 4 | 4H | Config migration, migration scripts, skill graph refactoring, regex extraction |
+| Research | 4 | 4H | Multi-source synthesis, git archaeology, structured data extraction, code review |
+| Tool Efficiency | 3 | 3H | Codebase navigation, targeted fixes, code generation |
 
-*E=Easy, M=Medium, H=Hard, X=Expert*
+*H=Hard, X=Expert. Only hard and expert tasks — no easy wins.*
 
 ## Scoring
 
 Each task is scored 0-100 across 3 layers:
 
-- **Layer 0 (40%)** — Automated structural checks: files exist, format valid, content matches, command-output validators
-- **Layer 1 (40%)** — Metrics: tool call count, planning time, errors
-- **Layer 2 (20%)** — Behavioral analysis: tool appropriateness, read-before-write patterns, efficiency, error recovery (rule-based from JSONL event log)
+- **Layer 0 (40%)** — Structural checks: files exist, content matches, command-output validators, format compliance
+- **Layer 1 (40%)** — Metrics: tool call count vs expected range, error rate, planning ratio
+- **Layer 2 (20%)** — Behavioral: tool appropriateness, read-before-write, efficiency, error recovery
 
-**All rule-based** — no LLM judges. Scores may vary ±3-5 points between runs due to non-deterministic agent execution; we recommend averaging 3 runs.
+**100% rule-based** — no LLM judges, no subjective grading. Scores may vary ±3-5 points between runs; average 3 runs for official results.
+
+## Per-Tool-Call Tracing
+
+Every tool call is logged with millisecond precision:
+
+```jsonl
+{"seq":1,"ts":1708900000123,"tool":"Read","target":"inputs/data.csv","status":"ok","detail":"Read input data"}
+{"seq":2,"ts":1708900001456,"tool":"Bash","target":"wc -l data.csv","status":"ok","detail":"Counted 847 lines"}
+{"seq":3,"ts":1708900002789,"tool":"Write","target":"analysis.md","status":"ok","detail":"Wrote report"}
+{"seq":4,"ts":1708900003100,"tool":"Bash","target":"python3 validate.py","status":"error","detail":"ModuleNotFoundError"}
+{"seq":5,"ts":1708900004500,"tool":"Bash","target":"pip install pandas && python3 validate.py","status":"ok","detail":"Retry succeeded"}
+```
+
+Trace every call, measure every millisecond. Full transparency — you can audit exactly how your agent solved each task.
+
+## Custom Benchmarks
+
+Test your setup on any prompt:
+
+```
+/benchmark --custom "Build a REST API with auth and rate limiting"
+```
+
+Uses full benchmark infrastructure but with your prompt. Scores L1 (metrics) + L2 (behavioral) — measures *how* your agent works, not *what* it produces.
 
 ## Not SWE-bench
 
-AgentBench is a different kind of benchmark. Here's how it compares:
-
 | | SWE-bench | AgentBench |
 |---|---|---|
-| **Tests** | Code bug fixes | General agent ability (files, research, data, workflows) |
+| **Tests** | Code bug fixes | General agent ability across 7 domains |
 | **Measures** | The model | Your setup + config + prompts |
-| **Tasks** | Pull request patches | Real-world work across 7 domains |
-| **Scoring** | Pass/fail | 3-layer 0-100 (rule-based, no LLM judges) |
-| **Who varies** | The model changes, setup is fixed | The setup changes, model can be fixed |
+| **Scoring** | Pass/fail | 3-layer 0-100 (rule-based) |
 | **Key insight** | "Which model is smartest?" | "How good is your agent configuration?" |
 
 Two people using the same model can score 30 points apart based on their agent config alone.
 
-## Key Metrics
-
-Captured via hooks (objective, not self-reported):
-
-- Wall-clock time (total, planning, execution)
-- Planning-to-execution ratio
-- Tool call count and breakdown by type
-- Error count
-- Subagent spawns
-- Context compactions
-- Token estimate *(reported only, not scored — quality shouldn't be penalized for thoroughness)*
-
 ## Output
 
-Each run produces three files in `agentbench-results/{run-id}/`:
+Each run produces:
 
-- **report.html** — Interactive dashboard (auto-opens in browser)
-- **report.md** — Markdown for terminal/GitHub
-- **results.json** — Machine-readable scores and metrics
-
-## Profiles
-
-- **Full** (default) — All 62 tasks across all difficulty levels
-- **Fast** (`--fast`) — 8 medium tasks for quick feedback, covers 4 of 7 domains
-
-Results track the profile used, and `/benchmark-compare` warns when comparing runs with different profiles.
+- **report.html** — Interactive dashboard
+- **report.md** — Markdown summary
+- **results.json** — Machine-readable scores, metrics, and trace data
+- **trace.jsonl** — Per-task tool call traces
 
 ## Modes
 
 - **Sandboxed** (default) — Tasks run in temp directories, no side effects
 - **Real** — Tasks run in your actual project, tests your real setup
-
-## Creating Tasks
-
-```
-/benchmark-create-task
-```
-
-Or manually create:
-
-```
-tasks/{suite}/{task-name}/
-├── task.yaml
-├── setup.sh           # Optional: creates workspace (git repo, files, scenarios)
-├── teardown.sh        # Optional: custom cleanup
-└── inputs/
-    └── {input-files}
-```
-
-Real-mode tasks use `setup.sh` to create realistic git repo workspaces with commit history, code, and embedded bugs or scenarios. See existing tasks for examples.
 
 ## License
 
