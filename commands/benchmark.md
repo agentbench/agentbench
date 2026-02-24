@@ -132,10 +132,12 @@ For each task:
    - **CRITICAL**: Tell the task-runner the exact absolute workspace path. ALL files must be created inside that path. Example: "Your workspace is /Users/tarek/myproject/.agentbench-tmp/summarize-doc — create all files there."
 
 3b. **Collect metrics** after task-runner completes:
-   - Check workspace for `metrics.json` (written by task-runner self-report)
-   - Also check `.agentbench-tmp/metrics/summary.json` (from hooks, if they fired)
-   - **Priority**: Use hooks summary.json if available (more accurate). Fall back to task-runner's metrics.json.
-   - If NEITHER exists: note metrics as unavailable (weights will redistribute to L0).
+   - Check workspace for `trace.jsonl` (per-tool-call trace with timestamps) and `metrics.json` (aggregate summary)
+   - `trace.jsonl` is the source of truth — each line is a tool call with seq number, millisecond timestamp, tool name, target, status, and detail
+   - `metrics.json` contains computed aggregates (total_time_ms, tool_calls, errors, etc.)
+   - If trace.jsonl exists but metrics.json doesn't, compute metrics yourself from the trace
+   - Also check `.agentbench-tmp/metrics/summary.json` (from hooks, if they fired) as supplementary data
+   - If NEITHER trace.jsonl nor metrics.json exists: note metrics as unavailable (weights will redistribute to L0).
 
 4. **Layer 0 — Automated Structural Checks** (you compute this directly):
    After the task-runner completes, check the workspace:
@@ -151,8 +153,9 @@ For each task:
    - Normalize the total to 0-100 scale.
 
 5. **Layer 1 — Metrics Analysis** (you compute this directly):
-   - Read metrics from hooks `summary.json` OR task-runner's `metrics.json` (whichever is available, hooks preferred)
-   - Map task-runner metrics: `tool_calls` → total tool calls, `errors` → error count, `planning_steps` → derive planning ratio (planning_steps / tool_calls)
+   - Read `trace.jsonl` for per-call data and `metrics.json` for aggregates
+   - From trace.jsonl: count tool calls, count errors (status="error"), compute total_time_ms (last ts - first ts), compute planning ratio (reads before first write / total calls)
+   - From metrics.json: use pre-computed aggregates as cross-check
    - If metrics are available and task has expected_metrics:
      - Tool calls within expected range: 40 points
      - Tool calls within 2x expected range: 20 points
@@ -166,41 +169,41 @@ For each task:
    - Normalize to 0-100 scale
    - If no metrics available (hooks didn't fire): redistribute L1 weight to L0. Set L1 score to null (excluded from composite). Recalculate composite as: `score = (L0 * 0.65) + (L2 * 0.35)` when L1 is unavailable, or `score = L0 * 1.0` when both L1 and L2 are unavailable. Log a note: "Metrics unavailable — weights redistributed to L0."
 
-6. **Layer 2 — Behavioral Analysis** (you compute this from metrics.json, events.jsonl, or execution-trace.md):
+6. **Layer 2 — Behavioral Analysis** (you compute this from trace.jsonl):
    
-   **Data sources (in priority order):**
-   1. Hooks JSONL (`events.jsonl`) — most detailed, if available
-   2. Task-runner self-report (`metrics.json`) — reliable fallback
-   3. Execution trace (`execution-trace.md`) — last resort, parse for patterns
+   Read `{workspace}/trace.jsonl` — each line is a tool call with exact timestamp, tool name, target, and status.
    
    Start at 100 points, apply penalties:
    
-   **Using hooks JSONL (if available):**
-   - Bash misuse (cat/head/tail for reading, echo > for writing): -5 per instance (max -25)
-   - No read-before-write: -25
-   - Duplicate file reads: -5 each (max -20)
-   - Tool errors: -7 each (max -28)
-   - Excessive tool calls (>2x expected): -15
-   - No planning (first tool <500ms after start): -10
-   - Error recovery: +3 per recovered error
+   **Tool appropriateness** (scan trace.jsonl entries):
+   - Bash tool where target contains "cat ", "head ", "tail ", "less " for file reading: -5 per instance (max -25)
+   - Bash tool where target contains "echo " + ">" or "printf " + ">" for file creation: -5 per instance (max -25)
    
-   **Using task-runner metrics.json (if no JSONL):**
-   - `read_before_write` is false AND task had input files: -25
-   - `errors` > 0: -7 per error (max -28)
-   - `tool_calls` > 2x expected_metrics upper bound: -15
-   - `planning_steps` == 0: -10
-   - Check `tool_calls_by_type`: if Bash count > Read+Write count AND task is a file task: -10 (bash misuse proxy)
-   - Check `files_read`: if input files not in list but should have been: -10
+   **Read-before-write pattern**:
+   - Find the first Write/Edit entry in trace. Check if any Read/Glob/Grep entries exist before it.
+   - If task had input files but no read before first write: -25
    
-   **Using execution-trace.md only (last resort):**
-   - Check if trace mentions reading input files: if not, -25
-   - Check if trace mentions planning/approach: if not, -10
-   - Check if trace mentions errors/retries: -7 per mentioned error
-   - Score is approximate — note "L2 from trace analysis" in results
+   **Efficiency**:
+   - Same file read more than once (duplicate target in Read entries): -5 each (max -20)
+   - Entries with status="error": -7 each (max -28)
+   
+   **Excessive tool calls**:
+   - If total trace entries exceed 2x the expected_metrics tool_calls upper bound: -15
+   
+   **No planning detected**:
+   - Check time gap between seq=1 and seq=2. If < 500ms AND first call is a Write: -10
+   - Or if no Read/Glob/Grep calls exist before first Write: -10
+   
+   **Error recovery**:
+   - If an error entry is followed within 3 entries by a successful call to the same tool/target: +3 per recovery
+   
+   **Timing analysis** (from timestamps):
+   - If any single tool call took >30 seconds (gap between consecutive ts values): note as "slow call" in results
+   - Report average time per tool call
    
    Floor at 0, cap at 100.
    
-   If NO data source available at all: redistribute L2 weight to L0. Set L2 score to null (excluded from composite). See weight redistribution rules in L1 above.
+   If trace.jsonl doesn't exist, fall back to metrics.json. If neither exists: redistribute L2 weight to L0.
 
 7. **Compute composite score**:
    ```

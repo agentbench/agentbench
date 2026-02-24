@@ -54,21 +54,114 @@ If the input contains multiple `turns`, process them sequentially:
 3. Continue until all turns are processed
 4. The execution-trace.md should cover all turns
 
-## Metrics Self-Report
+## Metrics — Tool Call Tracing
 
-At the end of execution (after writing execution-trace.md), write a `{workspace}/metrics.json` file with:
+You MUST maintain a detailed trace of every tool call. This is critical for benchmarking accuracy.
 
-```json
-{
-  "tool_calls": <number of tool invocations you made (Read, Write, Edit, Bash, etc.)>,
-  "tool_calls_by_type": {"Read": N, "Write": N, "Bash": N, "Edit": N, ...},
-  "errors": <number of tool calls that failed/errored>,
-  "files_read": [<list of files you read>],
-  "files_written": [<list of files you created or modified>],
-  "read_before_write": <true if you read input files before writing output, false otherwise>,
-  "planning_steps": <number of distinct planning/thinking steps before first tool use>,
-  "turns_processed": <number of turns if multi-turn, else 1>
-}
+### Step 1: Initialize trace at the very start
+
+Before doing ANY work, run:
+```bash
+cd {workspace} && date +%s%3N > .trace_start
 ```
 
-Count accurately — every Read, Write, Edit, Bash, Glob, Grep, WebSearch, etc. is a tool call. Be honest; this is for benchmarking, not grading you.
+### Step 2: Log every tool call
+
+After EVERY tool invocation (Read, Write, Edit, Bash, Glob, Grep, WebSearch, etc.), immediately run:
+```bash
+echo '{"seq":N,"ts":'$(date +%s%3N)',"tool":"TOOL_NAME","target":"FILE_OR_COMMAND","status":"ok|error","detail":"brief description"}' >> {workspace}/trace.jsonl
+```
+
+Replace:
+- `N` with the sequential call number (1, 2, 3...)
+- `TOOL_NAME` with the exact tool (Read, Write, Edit, Bash, Glob, Grep, WebSearch, etc.)
+- `FILE_OR_COMMAND` with the file path or command (first 100 chars)
+- `status` with "ok" or "error"
+- `detail` with a brief description of what the call did (max 80 chars)
+
+**This logging call itself does NOT count as a tool call in the sequence.**
+
+### Step 3: Write metrics summary at the end
+
+After all work is done, run this to generate `metrics.json`:
+```bash
+cd {workspace} && python3 -c "
+import json
+traces = []
+with open('trace.jsonl') as f:
+    for line in f:
+        line = line.strip()
+        if line:
+            try: traces.append(json.loads(line))
+            except: pass
+
+start_ms = int(open('.trace_start').read().strip())
+last_ms = traces[-1]['ts'] if traces else start_ms
+
+by_type = {}
+errors = 0
+files_read = []
+files_written = []
+first_write_seq = None
+has_read_before_write = False
+
+for t in traces:
+    tool = t.get('tool','unknown')
+    by_type[tool] = by_type.get(tool, 0) + 1
+    if t.get('status') == 'error':
+        errors += 1
+    target = t.get('target','')
+    if tool in ('Read','Glob','Grep') or (tool == 'Bash' and any(c in target for c in ['cat ','head ','tail ','less '])):
+        if target not in files_read:
+            files_read.append(target)
+    if tool in ('Write','Edit') or (tool == 'Bash' and any(c in target for c in ['> ','>> ','tee '])):
+        if target not in files_written:
+            files_written.append(target)
+        if first_write_seq is None:
+            first_write_seq = t['seq']
+    if tool in ('Read','Glob','Grep') and first_write_seq is not None and t['seq'] < first_write_seq:
+        has_read_before_write = True
+
+if first_write_seq is None or not files_read:
+    has_read_before_write = len(files_read) == 0
+
+# Planning: count traces before first non-Bash tool or first meaningful action
+planning_steps = 0
+for t in traces:
+    if t['seq'] == 1 and t['tool'] == 'Bash' and 'date' in t.get('target',''):
+        continue
+    if t['tool'] in ('Read','Glob','Grep'):
+        planning_steps += 1
+    else:
+        break
+
+json.dump({
+    'total_time_ms': last_ms - start_ms,
+    'start_ms': start_ms,
+    'end_ms': last_ms,
+    'tool_calls': len(traces),
+    'tool_calls_by_type': by_type,
+    'errors': errors,
+    'files_read': files_read,
+    'files_written': files_written,
+    'read_before_write': has_read_before_write,
+    'planning_steps': planning_steps,
+    'turns_processed': 1,
+    'trace_file': 'trace.jsonl'
+}, open('metrics.json','w'), indent=2)
+print('Metrics written.')
+"
+```
+
+If `python3` is not available, write `metrics.json` manually with your best count of tool calls, but **always write trace.jsonl** — it's the source of truth.
+
+### Example trace.jsonl
+```jsonl
+{"seq":1,"ts":1708900000123,"tool":"Read","target":"inputs/data.csv","status":"ok","detail":"Read input data file"}
+{"seq":2,"ts":1708900001456,"tool":"Bash","target":"wc -l inputs/data.csv","status":"ok","detail":"Counted 847 lines"}
+{"seq":3,"ts":1708900002789,"tool":"Write","target":"analysis.md","status":"ok","detail":"Wrote analysis report"}
+{"seq":4,"ts":1708900003100,"tool":"Bash","target":"python3 validate.py","status":"error","detail":"ModuleNotFoundError: pandas"}
+{"seq":5,"ts":1708900004500,"tool":"Bash","target":"pip install pandas && python3 validate.py","status":"ok","detail":"Installed pandas and ran validation"}
+```
+
+Every tool call is traceable. Every millisecond is logged. Be precise.

@@ -44,6 +44,8 @@ Machine-readable results with this structure:
     "total_tool_calls": 187,
     "total_errors": 3,
     "avg_planning_ratio": 0.28,
+    "avg_time_per_call_ms": 1250,
+    "slowest_call_ms": 8500,
     "est_tokens": 245000,
     "compactions": 1
   },
