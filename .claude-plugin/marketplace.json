@@ -8,8 +8,8 @@
     {
       "name": "agentbench",
       "source": "./",
-      "description": "Benchmark your Claude Code agent's general capabilities across 68 real-world tasks spanning 7 domains with 3-layer scoring. 100% rule-based, no LLM judges.",
-      "version": "2.3.0",
+      "description": "Benchmark your Claude Code agent's general capabilities across 62 real-world tasks spanning 7 domains with 3-layer scoring. 100% rule-based, no LLM judges.",
+      "version": "2.4.0",
       "author": {
         "name": "AgentBench"
       },

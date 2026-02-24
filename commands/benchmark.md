@@ -19,7 +19,15 @@ Parse from $ARGUMENTS:
 
 ## Workflow
 
-### Step 0: Choose Execution Mode
+### Step 0a: Preflight Check
+
+Verify `python3` is available by running `python3 --version`. If it fails, warn the user immediately:
+
+"**Warning:** `python3` is not available. Metrics hooks require Python 3 to collect tool-call data. Without it, L1 (metrics) and L2 (behavioral) scoring will be unavailable — all task scores will fall back to L0 only. Install Python 3 to get full scoring."
+
+Ask the user if they want to continue without metrics or abort. If they continue, proceed normally — the hooks will silently fail and weights will redistribute to L0.
+
+### Step 0b: Choose Execution Mode
 
 If the user did NOT specify `--mode` in arguments, ask them to choose:
 
