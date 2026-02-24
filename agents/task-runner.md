@@ -53,3 +53,22 @@ If the input contains multiple `turns`, process them sequentially:
 2. Wait for completion, then execute the next turn
 3. Continue until all turns are processed
 4. The execution-trace.md should cover all turns
+
+## Metrics Self-Report
+
+At the end of execution (after writing execution-trace.md), write a `{workspace}/metrics.json` file with:
+
+```json
+{
+  "tool_calls": <number of tool invocations you made (Read, Write, Edit, Bash, etc.)>,
+  "tool_calls_by_type": {"Read": N, "Write": N, "Bash": N, "Edit": N, ...},
+  "errors": <number of tool calls that failed/errored>,
+  "files_read": [<list of files you read>],
+  "files_written": [<list of files you created or modified>],
+  "read_before_write": <true if you read input files before writing output, false otherwise>,
+  "planning_steps": <number of distinct planning/thinking steps before first tool use>,
+  "turns_processed": <number of turns if multi-turn, else 1>
+}
+```
+
+Count accurately — every Read, Write, Edit, Bash, Glob, Grep, WebSearch, etc. is a tool call. Be honest; this is for benchmarking, not grading you.

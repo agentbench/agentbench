@@ -21,11 +21,9 @@ Parse from $ARGUMENTS:
 
 ### Step 0a: Preflight Check
 
-Verify `python3` is available by running `python3 --version`. If it fails, warn the user immediately:
+Verify `python3` is available by running `python3 --version`. Python is needed for some task validators (command-output-contains). If unavailable, warn but continue — most scoring still works.
 
-"**Warning:** `python3` is not available. Metrics hooks require Python 3 to collect tool-call data. Without it, L1 (metrics) and L2 (behavioral) scoring will be unavailable — all task scores will fall back to L0 only. Install Python 3 to get full scoring."
-
-Ask the user if they want to continue without metrics or abort. If they continue, proceed normally — the hooks will silently fail and weights will redistribute to L0.
+**Metrics collection:** L1/L2 metrics are collected via task-runner self-report (metrics.json) and optionally via hooks (events.jsonl). Self-report works on all platforms without hooks. Hooks provide richer data when available.
 
 ### Step 0b: Choose Execution Mode
 
@@ -98,11 +96,11 @@ For each task:
    - Do NOT pass expected_outputs, validators, or scoring info to the task-runner
    - **CRITICAL**: Tell the task-runner the exact absolute workspace path. ALL files must be created inside that path. Example: "Your workspace is /Users/tarek/myproject/.agentbench-tmp/summarize-doc — create all files there."
 
-3b. **Compute metrics summary** after task-runner completes:
-   - Check `.agentbench-tmp/metrics/` for `events.jsonl` and `summary.json`
-   - The hooks write metrics to `$CLAUDE_PROJECT_DIR/.agentbench-tmp/metrics/` (or cwd). The Stop hook auto-computes summary.json.
-   - If `summary.json` exists, use it for L1. If `events.jsonl` exists, use it for L2.
-   - If neither exists, run: `ls -la .agentbench-tmp/metrics/ 2>/dev/null` to debug, then note metrics as unavailable (weights will redistribute to L0).
+3b. **Collect metrics** after task-runner completes:
+   - Check workspace for `metrics.json` (written by task-runner self-report)
+   - Also check `.agentbench-tmp/metrics/summary.json` (from hooks, if they fired)
+   - **Priority**: Use hooks summary.json if available (more accurate). Fall back to task-runner's metrics.json.
+   - If NEITHER exists: note metrics as unavailable (weights will redistribute to L0).
 
 4. **Layer 0 — Automated Structural Checks** (you compute this directly):
    After the task-runner completes, check the workspace:
@@ -118,7 +116,8 @@ For each task:
    - Normalize the total to 0-100 scale.
 
 5. **Layer 1 — Metrics Analysis** (you compute this directly):
-   - Read the metrics summary from `.agentbench-tmp/metrics/summary.json`
+   - Read metrics from hooks `summary.json` OR task-runner's `metrics.json` (whichever is available, hooks preferred)
+   - Map task-runner metrics: `tool_calls` → total tool calls, `errors` → error count, `planning_steps` → derive planning ratio (planning_steps / tool_calls)
    - If metrics are available and task has expected_metrics:
      - Tool calls within expected range: 40 points
      - Tool calls within 2x expected range: 20 points
@@ -132,36 +131,41 @@ For each task:
    - Normalize to 0-100 scale
    - If no metrics available (hooks didn't fire): redistribute L1 weight to L0. Set L1 score to null (excluded from composite). Recalculate composite as: `score = (L0 * 0.65) + (L2 * 0.35)` when L1 is unavailable, or `score = L0 * 1.0` when both L1 and L2 are unavailable. Log a note: "Metrics unavailable — weights redistributed to L0."
 
-6. **Layer 2 — Behavioral Analysis** (you compute this directly from the JSONL events log):
-   Read events from `.agentbench-tmp/metrics/events.jsonl`
+6. **Layer 2 — Behavioral Analysis** (you compute this from metrics.json, events.jsonl, or execution-trace.md):
+   
+   **Data sources (in priority order):**
+   1. Hooks JSONL (`events.jsonl`) — most detailed, if available
+   2. Task-runner self-report (`metrics.json`) — reliable fallback
+   3. Execution trace (`execution-trace.md`) — last resort, parse for patterns
    
    Start at 100 points, apply penalties:
    
-   **Tool appropriateness** (check from JSONL events):
-   - Count PostToolUse events where tool="Bash" and the input contains "cat ", "head ", "tail ", or "less " followed by a filename → each instance: -5 points (max -25)
-   - Count PostToolUse events where tool="Bash" and the input contains "echo " + ">" or "printf " + ">" for file creation → each instance: -5 points (max -25)
+   **Using hooks JSONL (if available):**
+   - Bash misuse (cat/head/tail for reading, echo > for writing): -5 per instance (max -25)
+   - No read-before-write: -25
+   - Duplicate file reads: -5 each (max -20)
+   - Tool errors: -7 each (max -28)
+   - Excessive tool calls (>2x expected): -15
+   - No planning (first tool <500ms after start): -10
+   - Error recovery: +3 per recovered error
    
-   **Read-before-write pattern**:
-   - Check if any Read/Bash-cat events for input files exist BEFORE the first Write event for output files
-   - If inputs existed but agent wrote output without reading any inputs first: -25 points
-   - If no input files for this task: no penalty
+   **Using task-runner metrics.json (if no JSONL):**
+   - `read_before_write` is false AND task had input files: -25
+   - `errors` > 0: -7 per error (max -28)
+   - `tool_calls` > 2x expected_metrics upper bound: -15
+   - `planning_steps` == 0: -10
+   - Check `tool_calls_by_type`: if Bash count > Read+Write count AND task is a file task: -10 (bash misuse proxy)
+   - Check `files_read`: if input files not in list but should have been: -10
    
-   **Efficiency**:
-   - Count duplicate file reads (same file read more than once): -5 points each (max -20)
-   - Count PostToolUseFailure events (tool errors): -7 points each (max -28)
-   
-   **Excessive tool calls**:
-   - If total tool calls exceed 2x the expected_metrics tool_calls upper bound: -15 points
-   
-   **No planning detected**:
-   - If the first tool call event occurs within 500ms of the session start timestamp: -10 points
-   
-   **Error recovery**:
-   - If PostToolUseFailure events exist, check if a successful retry follows within 3 events: +3 points back per recovered error
+   **Using execution-trace.md only (last resort):**
+   - Check if trace mentions reading input files: if not, -25
+   - Check if trace mentions planning/approach: if not, -10
+   - Check if trace mentions errors/retries: -7 per mentioned error
+   - Score is approximate — note "L2 from trace analysis" in results
    
    Floor at 0, cap at 100.
    
-   If no JSONL events available (hooks didn't fire): redistribute L2 weight to L0. Set L2 score to null (excluded from composite). See weight redistribution rules in L1 above.
+   If NO data source available at all: redistribute L2 weight to L0. Set L2 score to null (excluded from composite). See weight redistribution rules in L1 above.
 
 7. **Compute composite score**:
    ```
