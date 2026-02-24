@@ -16,6 +16,7 @@ Parse from $ARGUMENTS:
 - `--keep-workspace`: Don't clean up temp directories after run
 - `--fast`: Run only easy and medium difficulty tasks. Default is full (all tasks). Combinable with --suite. Ignored when --task is specified.
 - `--strict`: Mark results as "deterministic" in the output JSON. The `results.json` output will include `"scoring_method": "deterministic"` — all scoring is fully automated with zero LLM judgment.
+- `--custom "<prompt>"`: Run a single custom prompt instead of predefined tasks. Uses the full benchmark infrastructure (workspace, task-runner, metrics collection) but with your own prompt. Scoring uses L1 (metrics) and L2 (behavioral) only — L0 is skipped since there are no predefined validators. Useful for testing how your setup handles specific workloads.
 
 ## Workflow
 
@@ -24,6 +25,40 @@ Parse from $ARGUMENTS:
 Verify `python3` is available by running `python3 --version`. Python is needed for some task validators (command-output-contains). If unavailable, warn but continue — most scoring still works.
 
 **Metrics collection:** L1/L2 metrics are collected via task-runner self-report (metrics.json) and optionally via hooks (events.jsonl). Self-report works on all platforms without hooks. Hooks provide richer data when available.
+
+### Step 0a.5: Custom Prompt Mode
+
+If `--custom` is specified, skip the normal task discovery and run in custom mode:
+
+1. Create workspace: `mkdir -p .agentbench-tmp/custom-task && cd .agentbench-tmp/custom-task && pwd` to get absolute path
+2. Spawn task-runner subagent with the custom prompt as `user_message`, the workspace path, and mode (sandboxed by default)
+3. After task-runner completes, collect metrics from `{workspace}/metrics.json`
+4. **Score L1 only** (from metrics.json):
+   - Tool calls: report count (no expected range to compare against, so just report)
+   - Errors: 0 errors = 100, 1-2 = 70, 3+ = 40
+   - Planning: planning_steps > 0 = 100, 0 = 70
+   - L1 score = weighted average of error score (50%) and planning score (50%)
+5. **Score L2** (from metrics.json):
+   - Start at 100, apply standard penalties:
+   - `read_before_write` false when files_read should be non-empty: -25
+   - `errors` > 0: -7 per error (max -28)
+   - `planning_steps` == 0: -10
+   - Floor at 0
+6. **Composite**: score = (L1 * 0.60) + (L2 * 0.40) — no L0 since no validators
+7. Output results:
+   ```
+   Custom Benchmark Result
+   ═══════════════════════
+   Prompt: "{first 100 chars of prompt}..."
+   Score: {composite}/100 (L1:{l1} L2:{l2})
+   Tool calls: {n} ({breakdown by type})
+   Errors: {n}
+   Planning steps: {n}
+   Files created: {list}
+   ```
+8. Save to `agentbench-results/custom-{timestamp}/results.json` with `"mode": "custom"`
+9. Clean up workspace (unless `--keep-workspace`)
+10. **Stop** — do not continue to normal benchmark flow.
 
 ### Step 0b: Choose Execution Mode
 
