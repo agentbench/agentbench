@@ -22,14 +22,9 @@ Parse from $ARGUMENTS:
 
 ### Step 0a: Preflight Check
 
-**Shell availability:** Check if `/bin/sh` exists by running `ls -la /bin/sh 2>/dev/null`. If it does NOT exist:
-- Try to create it: `sudo ln -sf $(which sh || which bash || which dash) /bin/sh 2>/dev/null || ln -sf $(which sh || which bash || which dash) /bin/sh 2>/dev/null`
-- If that fails (no permissions), warn: "⚠️ /bin/sh not found — hooks will be unavailable. Scoring will rely on task-runner self-report (metrics.json) only."
-- This is needed because Claude Code's hook runner uses `/bin/sh` internally to execute hook commands.
-
 Verify `python3` is available by running `python3 --version`. Python is needed for some task validators (command-output-contains). If unavailable, warn but continue — most scoring still works.
 
-**Metrics collection:** L1/L2 metrics are collected via task-runner self-report (metrics.json) and optionally via hooks (events.jsonl). Self-report works on all platforms without hooks. Hooks provide richer data when available.
+**Metrics collection:** All metrics are collected via the task-runner's self-report: `trace.jsonl` (per-tool-call trace with timestamps) and `metrics.json` (computed aggregates). This is platform-independent and works in all environments including sandboxes.
 
 ### Step 0a.5: Custom Prompt Mode
 
@@ -122,7 +117,7 @@ For each task:
    - Copy input files from `${CLAUDE_PLUGIN_ROOT}/tasks/{suite}/{task}/inputs/` to the workspace (if inputs/ exists)
    - If the task directory contains a `setup.sh`: run `bash ${CLAUDE_PLUGIN_ROOT}/tasks/{suite}/{task}/setup.sh {workspace-path}` to scaffold the workspace. The setup script receives the workspace path as $1 and creates files, git repos, etc. inside it.
    - For validators that use `file-unchanged`: compute checksums of specified files now (after setup, before task-runner runs) and store them for comparison after scoring.
-   - Clear any previous task's metrics: run `rm -rf .agentbench-tmp/metrics/ 2>/dev/null && mkdir -p .agentbench-tmp/metrics/` to ensure fresh metrics for this task
+   - Metrics are self-contained in each task workspace (trace.jsonl + metrics.json) — no shared metrics directory needed
    - Set environment variable `AGENTBENCH_RUN_ID` to `{run-id}-{task-id}`
 
 2. **Announce**: Tell the user which task is running:
@@ -141,7 +136,7 @@ For each task:
    - `trace.jsonl` is the source of truth — each line is a tool call with seq number, millisecond timestamp, tool name, target, status, and detail
    - `metrics.json` contains computed aggregates (total_time_ms, tool_calls, errors, etc.)
    - If trace.jsonl exists but metrics.json doesn't, compute metrics yourself from the trace
-   - Also check `.agentbench-tmp/metrics/summary.json` (from hooks, if they fired) as supplementary data
+   - All metrics come from task-runner self-report — no external hooks needed
    - If NEITHER trace.jsonl nor metrics.json exists: note metrics as unavailable (weights will redistribute to L0).
 
 4. **Layer 0 — Automated Structural Checks** (you compute this directly):
@@ -172,7 +167,7 @@ For each task:
      - 1-2 errors: 15 points
      - 3+ errors: 0 points
    - Normalize to 0-100 scale
-   - If no metrics available (hooks didn't fire): redistribute L1 weight to L0. Set L1 score to null (excluded from composite). Recalculate composite as: `score = (L0 * 0.65) + (L2 * 0.35)` when L1 is unavailable, or `score = L0 * 1.0` when both L1 and L2 are unavailable. Log a note: "Metrics unavailable — weights redistributed to L0."
+   - If no metrics available (task-runner didn't produce trace.jsonl/metrics.json): redistribute L1 weight to L0. Set L1 score to null (excluded from composite). Recalculate composite as: `score = (L0 * 0.65) + (L2 * 0.35)` when L1 is unavailable, or `score = L0 * 1.0` when both L1 and L2 are unavailable. Log a note: "Metrics unavailable — weights redistributed to L0."
 
 6. **Layer 2 — Behavioral Analysis** (you compute this from trace.jsonl):
    
@@ -228,7 +223,7 @@ For each task:
 
 8. **Save task result immediately** to `agentbench-results/{run-id}/{task-id}/`:
    - `scores.json`: All layer scores, composite score, breakdown
-   - `metrics.json`: Copy of the hooks metrics summary (if available)
+   - `metrics.json`: Copy of the task-runner's metrics summary
    - Copy any output files the task-runner created
    - Also append a line to `agentbench-results/{run-id}/progress.jsonl`: `{"task_id":"{task-id}","suite":"{suite}","score":{composite},"l0":{l0},"l1":{l1},"l2":{l2}}`
    - This progress file allows resuming after compaction — just read it to see what's done.
