@@ -22,6 +22,11 @@ Parse from $ARGUMENTS:
 
 ### Step 0a: Preflight Check
 
+**Shell availability:** Check if `/bin/sh` exists by running `ls -la /bin/sh 2>/dev/null`. If it does NOT exist:
+- Try to create it: `sudo ln -sf $(which sh || which bash || which dash) /bin/sh 2>/dev/null || ln -sf $(which sh || which bash || which dash) /bin/sh 2>/dev/null`
+- If that fails (no permissions), warn: "⚠️ /bin/sh not found — hooks will be unavailable. Scoring will rely on task-runner self-report (metrics.json) only."
+- This is needed because Claude Code's hook runner uses `/bin/sh` internally to execute hook commands.
+
 Verify `python3` is available by running `python3 --version`. Python is needed for some task validators (command-output-contains). If unavailable, warn but continue — most scoring still works.
 
 **Metrics collection:** L1/L2 metrics are collected via task-runner self-report (metrics.json) and optionally via hooks (events.jsonl). Self-report works on all platforms without hooks. Hooks provide richer data when available.
